@@ -1,0 +1,145 @@
+# Profile Fit Criteria for Job Matching
+# Used by filters/matcher.py to score listings
+
+# Hard reject: if ANY of these terms appear in title, auto-reject
+reject_title_keywords:
+  - frontend
+  - front-end
+  - front end
+  - react native
+  - mobile developer
+  - ios developer
+  - android developer
+  - ui developer
+  - ux developer
+  - engineering manager
+  - head of engineering
+  - vp of engineering
+  - cto
+  - director of engineering
+  - devops engineer
+  - sre
+  - site reliability
+  - security engineer
+  - sales
+  - marketing
+  - product manager
+  - project manager
+  - designer
+  - data scientist
+  - data analyst
+
+# Hard reject: if ALL of these are absent from title, likely not a fit
+# (at least one positive keyword must be present)
+require_any_title_keyword:
+  - engineer
+  - developer
+  - software
+  - backend
+  - back-end
+  - platform
+  - infrastructure
+  - architect
+  - lead
+  - staff
+  - principal
+  - senior
+
+# Soft scoring: positive keywords in title or description
+positive_title_keywords:
+  senior: 15
+  staff: 20
+  principal: 20
+  lead: 10
+  backend: 15
+  back-end: 15
+  platform: 15
+  infrastructure: 15
+  distributed: 15
+  systems: 10
+
+positive_tech_keywords:
+  # Languages
+  java: 10
+  kotlin: 10
+  golang: 10
+  "go": 8
+  rust: 10
+  python: 5
+  # Infrastructure
+  kafka: 15
+  kafka streams: 10
+  stream processing: 15
+  event-driven: 10
+  event sourcing: 10
+  kubernetes: 10
+  k8s: 8
+  distributed systems: 15
+  microservices: 8
+  # Data stores
+  postgres: 8
+  postgresql: 8
+  cassandra: 10
+  redis: 5
+  aurora: 5
+  # Cloud
+  aws: 8
+  # ML infra
+  feature store: 15
+  ml infrastructure: 15
+  machine learning: 8
+  feature engineering: 10
+  real-time inference: 15
+  # Bonus
+  terraform: 5
+  argocd: 5
+  gitops: 5
+
+positive_domain_keywords:
+  fintech: 8
+  payments: 8
+  fraud: 8
+  observability: 10
+  telemetry: 10
+  banking: 5
+  feature store: 10
+
+# Location preferences
+remote_keywords:
+  - remote
+  - remotely
+  - anywhere
+  - distributed team
+
+eu_locations:
+  - barcelona
+  - spain
+  - madrid
+  - remote eu
+  - remote europe
+  - berlin
+  - germany
+  - amsterdam
+  - netherlands
+  - paris
+  - france
+  - london
+  - uk
+  - lisbon
+  - portugal
+  - dublin
+  - ireland
+  - stockholm
+  - sweden
+  - warsaw
+  - poland
+  - zurich
+  - switzerland
+  - vienna
+  - austria
+  - milan
+  - italy
+
+# Scoring thresholds
+strong_match_threshold: 70
+worth_a_look_threshold: 45

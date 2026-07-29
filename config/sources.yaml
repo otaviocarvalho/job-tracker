@@ -1,0 +1,70 @@
+# Job Sources Configuration
+# Each source has: name, type, url, and optional type-specific config
+
+sources:
+  # --- VC Portfolio Job Boards (Greenhouse/Lever/Ashby APIs) ---
+  - name: "Sequoia Portfolio"
+    type: greenhouse
+    config:
+      board: sequoiacap
+    url: https://jobs.sequoiacap.com
+
+  - name: "a16z Portfolio"
+    type: greenhouse
+    config:
+      board: a16z
+    url: https://portfolio-jobs.a16z.com
+
+  - name: "Index Ventures Portfolio"
+    type: greenhouse
+    config:
+      board: indexventures
+    url: https://jobs.indexventures.com
+
+  - name: "Greylock Portfolio"
+    type: greenhouse
+    config:
+      board: greylock
+    url: https://jobs.greylock.com
+
+  # --- YC Startup Directory ---
+  - name: "Y Combinator Jobs"
+    type: ycombinator
+    url: https://www.ycombinator.com/jobs
+
+  # --- Hacker News Who's Hiring ---
+  - name: "HN Who's Hiring"
+    type: hackernews
+    url: https://news.ycombinator.com/submitted?id=whoishiring
+
+  # --- Substack Newsletters ---
+  - name: "Next Play Newsletter"
+    type: substack
+    config:
+      publication: nextplay
+    url: https://nextplay.substack.com
+
+  - name: "Early Days Newsletter"
+    type: substack
+    config:
+      publication: earlydaysbymerlin
+    url: https://earlydaysbymerlin.substack.com
+
+  - name: "a16z Build Newsletter"
+    type: substack
+    config:
+      publication: a16zbuild
+    url: https://a16zbuild.substack.com
+
+  # --- Reports (manual/periodic check) ---
+  - name: "Ramp Vendor Reports"
+    type: report
+    url: https://ramp.com/data
+
+  - name: "Harmonic Hot 25"
+    type: report
+    url: https://harmonic.ai/hot-25-startups
+
+  - name: "Founders You Should Know"
+    type: report
+    url: https://foundersysk.com
