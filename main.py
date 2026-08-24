@@ -14,7 +14,7 @@ from pathlib import Path
 # Ensure src is importable
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
-from scrapers import greenhouse, hackernews, ycombinator, substack
+from scrapers import greenhouse, hackernews, ycombinator, substack, speedrun, infranyc
 from filters import matcher
 from store import seen
 from output import digest
@@ -44,6 +44,10 @@ def scrape_source(source: dict) -> list[dict]:
         return ycombinator.scrape(url, name)
     elif stype == "substack":
         return substack.scrape(config.get("publication", ""), url, name)
+    elif stype == "speedrun":
+        return speedrun.scrape(url, name)
+    elif stype == "infranyc":
+        return infranyc.scrape(url, name)
     elif stype == "report":
         print(f"  [report:{name}] Report-type sources need manual review: {url}")
         return []

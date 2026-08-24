@@ -56,6 +56,16 @@ sources:
       publication: a16zbuild
     url: https://a16zbuild.substack.com
 
+  # --- a16z Speedrun Talent Network ---
+  - name: "Speedrun Talent Network"
+    type: speedrun
+    url: https://speedrun-talent-network.com/api/v1/jobs?fn=engineering
+
+  # --- infra.nyc curated board ---
+  - name: "infra.nyc"
+    type: infranyc
+    url: https://www.infra.nyc/jobs
+
   # --- Reports (manual/periodic check) ---
   - name: "Ramp Vendor Reports"
     type: report
