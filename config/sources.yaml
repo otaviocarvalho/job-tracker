@@ -3,29 +3,14 @@
 
 sources:
   # --- VC Portfolio Job Boards (Greenhouse/Lever/Ashby APIs) ---
-  - name: "Sequoia Portfolio"
-    type: greenhouse
-    config:
-      board: sequoiacap
-    url: https://jobs.sequoiacap.com
-
+  # NOTE: sequoiacap, indexventures, greylock greenhouse boards removed
+  # 2026-08-30: all three boards 404 (companies left Greenhouse; their job
+  # sites are now JS-rendered apps on other ATS with no public API).
   - name: "a16z Portfolio"
     type: greenhouse
     config:
       board: a16z
     url: https://portfolio-jobs.a16z.com
-
-  - name: "Index Ventures Portfolio"
-    type: greenhouse
-    config:
-      board: indexventures
-    url: https://jobs.indexventures.com
-
-  - name: "Greylock Portfolio"
-    type: greenhouse
-    config:
-      board: greylock
-    url: https://jobs.greylock.com
 
   # --- YC Startup Directory ---
   - name: "Y Combinator Jobs"
