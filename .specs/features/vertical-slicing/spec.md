@@ -166,16 +166,16 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | ARCH-01 | P1: Poetry Packaging | Design | Verified |
 | ARCH-02 | P1: Poetry Packaging | Design | Verified |
 | ARCH-03 | P1: Poetry Packaging | Design | Verified |
-| ARCH-04 | P2: Vertical Feed Slices | Design | Pending |
-| ARCH-05 | P2: Vertical Feed Slices | Design | Pending |
+| ARCH-04 | P2: Vertical Feed Slices | Design | Verified |
+| ARCH-05 | P2: Vertical Feed Slices | Design | Verified |
 | ARCH-06 | P2: Vertical Feed Slices | Design | Verified |
 | ARCH-07 | P2: Vertical Feed Slices | Design | Verified |
-| ARCH-08 | P2: Vertical Feed Slices | Design | Pending |
-| ARCH-09 | P2: Vertical Feed Slices | Design | Pending |
+| ARCH-08 | P2: Vertical Feed Slices | Design | Verified |
+| ARCH-09 | P2: Vertical Feed Slices | Design | Verified |
 | ARCH-10 | P3: Shared Core | Design | Verified |
 | ARCH-11 | P3: Shared Core | Design | Verified |
-| ARCH-12 | P3: Shared Core | Design | Pending |
-| ARCH-13 | P3: Shared Core | Design | Pending |
+| ARCH-12 | P3: Shared Core | Design | Verified |
+| ARCH-13 | P3: Shared Core | Design | Verified |
 | ARCH-14 | P4: CLI Contract Parity | Design | Pending |
 | ARCH-15 | P4: CLI Contract Parity | Design | Pending |
 | ARCH-16 | P4: CLI Contract Parity | Design | Pending |

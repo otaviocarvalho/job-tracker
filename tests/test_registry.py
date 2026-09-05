@@ -1,12 +1,16 @@
-"""Registry tests (ARCH-06, ARCH-07): registration, dispatch contract, unknown type."""
+"""Registry tests (ARCH-06, ARCH-07): registration, dispatch contract, unknown type.
+
+Each test swaps _REGISTRY via monkeypatch so global state never leaks
+between test files (feeds discovery tests rely on the populated registry).
+"""
 import ast
 from pathlib import Path
 
 import jobtracker.registry as registry
 
 
-def test_register_decorator_stores_function():
-    registry._REGISTRY.clear()
+def test_register_decorator_stores_function(monkeypatch):
+    registry._REGISTRY = {}
 
     @registry.register("faketest")
     def scrape(source):
@@ -15,19 +19,19 @@ def test_register_decorator_stores_function():
     assert registry.get("faketest") is scrape
 
 
-def test_registered_types_is_sorted_view():
-    registry._REGISTRY.clear()
+def test_registered_types_is_sorted_view(monkeypatch):
+    registry._REGISTRY = {}
     registry.register("b")((lambda s: []))
     registry.register("a")((lambda s: []))
     assert registry.registered_types() == ["a", "b"]
 
 
 def test_get_unknown_type_returns_none():
-    assert registry.get("no-such-type") is None
+    assert registry.get("no-such-type-xyz") is None
 
 
-def test_scrape_source_passes_full_source_entry_to_feed(capsys):
-    registry._REGISTRY.clear()
+def test_scrape_source_passes_full_source_entry_to_feed(monkeypatch, capsys):
+    registry._REGISTRY = {}
     received = {}
 
     @registry.register("fullentry")

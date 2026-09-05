@@ -187,7 +187,7 @@ T8
 ### T5: Vertical feed slices with auto-discovery
 
 **What**: Create `src/jobtracker/feeds/` package: `__init__.py` auto-imports every module via `pkgutil.iter_modules(__path__)`; move all 7 scrapers as self-contained slices (`greenhouse.py`, `hackernews.py`, `infranyc.py`, `report.py`, `speedrun.py`, `substack.py`, `ycombinator.py`), each defining `@register("<type>") scrape(source: dict) -> list[dict]` adapting its legacy signature; ycombinator enrichment keywords switch to `core.config.load_criteria()`. Unit tests per feed (parse/extract logic network-free via mocked `urllib` responses or pure-function calls) + zero-touch discovery test (temp module written into the feeds dir registers on package reload, cleaned up after).
-**Where**: `src/jobtracker/feeds/` (8 files), `tests/feeds/test_<feed>.py` (7 files), `tests/feeds/test_discovery.py`
+**Where**: `src/jobtracker/feeds/` (8 files), `tests/feeds/test_<feed>.py` (7 files), `tests/feeds/test_discovery.py`, `tests/test_registry.py` (isolation: _REGISTRY via monkeypatch)
 **Depends on**: T4
 **Reuses**: `src/scrapers/*.py` bodies (near-verbatim, signature adaptation only)
 **Requirement**: ARCH-04, ARCH-05, ARCH-08, ARCH-09, ARCH-13
@@ -199,11 +199,11 @@ T8
 
 **Done when**:
 
-- [ ] All 7 feed types registered after `import jobtracker.feeds`; `registered_types()` == greenhouse, hackernews, infranyc, report, speedrun, substack, ycombinator
-- [ ] Zero-touch test: a new module file with `@register` becomes discoverable without editing any other file
-- [ ] Per-feed tests pass network-free: greenhouse JSON→listings + location fallback; hackernews comment parse (pipe format, title detection, reply skip, short-comment skip) with mocked thread discovery; ycombinator Inertia payload extraction + enrichment keyword gating; substack RSS item extraction (publication and url variants); speedrun synthetic description assembly; infranyc RSC chunk reassembly + `_extract_json_array` bracket matching; report manual-review notice
-- [ ] Error convention asserted for at least greenhouse + speedrun: exception → printed `  [<feed>:<id>] Error: ...` + `[]`
-- [ ] Gate check passes: `poetry run pytest -q` green
+- [x] All 7 feed types registered after `import jobtracker.feeds`; `registered_types()` == greenhouse, hackernews, infranyc, report, speedrun, substack, ycombinator
+- [x] Zero-touch test: a new module file with `@register` becomes discoverable without editing any other file
+- [x] Per-feed tests pass network-free: greenhouse JSON→listings + location fallback; hackernews comment parse (pipe format, title detection, reply skip, short-comment skip) with mocked thread discovery; ycombinator Inertia payload extraction + enrichment keyword gating; substack RSS item extraction (publication and url variants); speedrun synthetic description assembly; infranyc RSC chunk reassembly + `_extract_json_array` bracket matching; report manual-review notice
+- [x] Error convention asserted for at least greenhouse + speedrun: exception → printed `  [<feed>:<id>] Error: ...` + `[]`
+- [x] Gate check passes: `poetry run pytest -q` green
 
 **Tests**: unit
 **Gate**: quick
@@ -212,6 +212,9 @@ T8
 
 ---
 
+**SPEC_DEVIATION**: `feeds/hackernews.py::_TAG_RE` fixed to `r"<[^>]+>"` (closing `>` was missing in src/scrapers/hackernews.py, so tag stripping left stray `>` chars; every other scraper already used the correct pattern). Behavior fix, not a verbatim move. Reason: tests derived from the spec's parsing intent exposed the latent typo; one-char fix, flagged to Otavio in the final report.
+
+---
 ### T6: Pipeline + CLI cutover, remove legacy layers
 
 **What**: Create `pipeline.py` (verbatim `run()` from `main.py`; sources via `core.config.load_sources`, dispatch via `registry.scrape_source`, scoring/seen/digest via core) and `cli.py` (verbatim argparse block, `main()`); rewrite `main.py` as thin shim (docstring + `sys.path` src bootstrap + `cli.main()`); DELETE `src/scrapers/`, `src/filters/`, `src/store/`, `src/output/`. Unit tests: pipeline orchestration with monkeypatched dispatch (order scrape→score→dedup→digest→mark-seen; `--dry-run` skips mark; `--reset` clears; source name filter; empty-listings early return), CLI flag parsing, and the golden stdout byte-match test running `main.py --source ramp --dry-run` via subprocess.
