@@ -6,9 +6,9 @@
 
 Feeds are self-contained vertical slices in `src/jobtracker/feeds/` (one module per source type, owning fetch + parse + `@register`). `registry.py` maps `sources.yaml:type` to scrape functions and never imports feeds; `feeds/__init__.py` auto-discovers modules via `pkgutil`. Adding a feed = one new module + one `sources.yaml` entry, no dispatcher edits. Dependency rule: `feeds → core` allowed; `core` must never import `feeds`/`registry`/`pipeline` (enforced by import-lint test).
 
-### AD-0002: Cron stdout contract is frozen (active, 2026-09-05)
+### AD-0002: Cron stdout contract is frozen (interpreter clause superseded by AD-0005, 2026-09-05)
 
-Hermes cron `e61ce479c5ee` runs `cd ~/code/job-tracker && /usr/bin/python3 main.py 2>/dev/null` and greps stdout for the DIGEST section. `main.py` stays at the repo root, flags stay `--reset/--source/--dry-run`, stdout text stays byte-compatible (golden test on `--source ramp --dry-run`). Runtime deps stay stdlib + PyYAML (present for system python). Do not switch the cron to `poetry run` without a new decision.
+The stdout rules of this decision remain in force: Hermes cron `e61ce479c5ee` greps stdout for the DIGEST section; `main.py` stays at the repo root, flags stay `--reset/--source/--dry-run`, stdout text stays byte-compatible (golden test on `--source ramp --dry-run`). Only the interpreter clause changed (see AD-0005).
 
 ### AD-0003: Poetry manages dev environment (active, 2026-09-05)
 
@@ -18,8 +18,12 @@ Hermes cron `e61ce479c5ee` runs `cd ~/code/job-tracker && /usr/bin/python3 main.
 
 `core/seen.py` resolves its data directory from `JOBTRACKER_DATA_DIR` when set (default `<repo>/data/`). All store/pipeline tests set it to a tmp dir. Tests must never read or write the production `data/seen.db`.
 
+### AD-0005: Cron runs the repo's in-project poetry venv (active, 2026-09-05)
+
+Supersedes the interpreter clause of AD-0002 (Otavio's call, 2026-09-05: the cron is not critical and may fail until fixed if the venv breaks). The cron executes `cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null`. `poetry.toml` (committed) pins `virtualenvs.in-project = true`; `poetry install` creates/syncs `.venv` with PyYAML locked by `poetry.lock`. The stdout contract (frozen wording, golden tests, DIGEST grep) is unchanged. System python (with PyYAML) remains a working fallback path. Never point the cron at bare `poetry run` (env resolution is shell-dependent on this box); call `.venv/bin/python` directly.
+
 ## Handoff Snapshot
 
-- **Feature**: vertical-slicing - ALL 8 TASKS COMPLETE (T1-T8), 76 tests passing, golden stdout byte-identical, live full-cycle dry run verified (465 raw listings, 33 scored, 6 strong + 27 worth), production seen.db untouched (106 rows before and after)
-- **Branch**: `refactor/vertical-slicing` in worktree `~/code/job-tracker-arch`; wiki pointer pushed to obsidian-otavio (299205f)
-- **Next step**: Verifier validation, then push branch + ask Otavio about merging to master (cron fires from master)
+- **Feature**: vertical-slicing delivered, verified, and merged to master (b8af9a9); AGENTS.md added (657ce49); cron migrated to the in-project venv per AD-0005 (dc293a4+)
+- **Cron**: job `e61ce479c5ee` now runs `cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null`; `.venv` (Python 3.11) created via `poetry install`; golden byte-match and 76 tests green under `.venv/bin/python`
+- **Next step**: none pending; if the cron ever fails with a missing interpreter, run `poetry install` in the repo root

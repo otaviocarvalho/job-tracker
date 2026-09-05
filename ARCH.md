@@ -94,16 +94,16 @@ That is the whole integration: one new module + one YAML line.
 
 ## The cron contract (do not break)
 
-The Hermes job runs `cd ~/code/job-tracker && /usr/bin/python3 main.py 2>/dev/null` and greps stdout for the digest section. Therefore:
+The Hermes job runs `cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null` and greps stdout for the digest section. Therefore:
 
-- `main.py` stays at the repo root and bootstraps `src/` onto `sys.path` itself: the cron needs no poetry env and no installed package.
-- Runtime dependencies stay stdlib + PyYAML (already available to the system python).
+- `main.py` stays at the repo root and bootstraps `src/` onto `sys.path` itself.
+- The interpreter is the repo's poetry-managed venv: `poetry.toml` (committed) pins `virtualenvs.in-project = true`, so `poetry install` creates/syncs `.venv` with PyYAML locked by `poetry.lock`. If `.venv` is missing or stale, `poetry install` recreates it; a cron failure with a missing interpreter means "run poetry install".
 - Stdout text is frozen. `tests/test_cli.py` byte-matches golden captures of `--source ramp --dry-run` (deterministic: report feed, no network, no dedup writes). If you intentionally change output wording, regenerate the goldens and update the cron prompt in the same change.
-- Switching the cron to `poetry run` would be a separate decision; today it is unnecessary.
+- Fallback: `main.py` still runs with the system python because runtime deps are stdlib + PyYAML (present for the system interpreter). The venv is the supported path (AD-0005 supersedes AD-0002's interpreter clause).
 
 ## Testing
 
 - `poetry install` once, then `poetry run pytest` (76 tests).
 - The suite never touches the network: every feed test mocks `urllib.request.urlopen` or tests pure parse helpers.
 - The suite never touches the production `data/seen.db`: set `JOBTRACKER_DATA_DIR` (all store/pipeline tests do; it overrides the data directory at call time).
-- Golden CLI tests double as the cron-contract gate; run the full check with `/usr/bin/python3 main.py --source ramp --dry-run` and compare against the embedded golden in `tests/test_cli.py`.
+- Golden CLI tests double as the cron-contract gate; run the full check with `.venv/bin/python main.py --source ramp --dry-run` and compare against the embedded golden in `tests/test_cli.py`.

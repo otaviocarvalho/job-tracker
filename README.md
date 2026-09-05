@@ -50,7 +50,7 @@ Tell Hermes in any session:
 
 ```
 Every day at 8am, run the job tracker and deliver the digest if there are
-new matches. Execute: cd ~/code/job-tracker && /usr/bin/python3 main.py
+new matches. Execute: cd ~/code/job-tracker && .venv/bin/python main.py
 2>/dev/null. If the output contains a "DIGEST" section with job listings,
 send the digest text as-is. If it says "No new listings", send nothing
 (stay silent). Do NOT send debug output or scraping logs.
@@ -61,7 +61,7 @@ send the digest text as-is. If it says "No new listings", send nothing
 ```
 /cron add "0 8 * * *" "Run the job tracker and deliver the digest if there are new matches.
 
-Execute: \`cd ~/code/job-tracker && /usr/bin/python3 main.py 2>/dev/null\`
+Execute: \`cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null\`
 
 If the output contains \"DIGEST\" section with job listings, send the digest text as-is.
 If the output says \"No new listings\" or \"No listings above threshold\", send nothing (stay silent).
@@ -89,5 +89,5 @@ See [ARCH.md](ARCH.md). It is the architecture doc of record (vertical feed slic
 ## Dependencies
 
 - Python 3.11+ (stdlib: urllib, json, sqlite3, xml, argparse)
-- PyYAML, declared and locked via poetry (`pyproject.toml` / `poetry.lock`); the cron runs `main.py` with the system python, so PyYAML must stay available there
-- Dev: pytest via the poetry dev group (`poetry run pytest`)
+- PyYAML, declared and locked via poetry (`pyproject.toml` / `poetry.lock`); the cron runs `main.py` with the repo venv (`.venv/bin/python`, created by `poetry install`), system python with PyYAML remains a fallback
+- Dev: pytest via the poetry dev group (`.venv/bin/python -m pytest`)
