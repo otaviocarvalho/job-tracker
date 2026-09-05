@@ -147,9 +147,9 @@ T8
 
 **Done when**:
 
-- [ ] Store tests pass against isolated temp DB: empty-url listing tracked, INSERT OR IGNORE idempotence, filter_unseen, clear_all; assert the resolved path is inside tmp dir (never repo `data/`)
-- [ ] Digest tests pass: empty → "", grouping strong-then-worth, signals capped at 5
-- [ ] Gate check passes: `poetry run pytest -q` green
+- [x] Store tests pass against isolated temp DB: empty-url listing tracked, INSERT OR IGNORE idempotence, filter_unseen, clear_all; assert the resolved path is inside tmp dir (never repo `data/`)
+- [x] Digest tests pass: empty → "", grouping strong-then-worth, signals capped at 5
+- [x] Gate check passes: `poetry run pytest -q` green
 
 **Tests**: unit
 **Gate**: quick
