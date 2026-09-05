@@ -37,7 +37,7 @@ One new module in `src/jobtracker/feeds/` with a `@register("<type>") scrape(sou
 - Conventional Commits (`feat`, `fix`, `refactor`, `docs`, `test`, `chore`), one logical change per commit, tests in the same commit as the code they cover.
 - Run `.venv/bin/python -m pytest` before every commit; capture the exit code explicitly, never pipe pytest through `tail` for the verdict.
 - The cron invokes `.venv/bin/python` directly (AD-0005 supersedes AD-0002's interpreter clause). After changing dependencies, run `poetry install` so `.venv` is synced, and never point the cron at `poetry run` or a bare interpreter without a new decision in `.specs/STATE.md`.
-- On the deployment machine, develop risky changes in a git worktree on a branch (the main checkout feeds the live cron) and `git pull --rebase` before starting; the repo is `github.com/otaviocarvalho/job-tracker` (private, default branch `master`).
+- On the deployment machine, develop risky changes in a git worktree on a branch (the main checkout feeds the live cron) and `git pull --rebase` before starting; the repo is `github.com/otaviocarvalho/job-tracker` (public, default branch `master`).
 
 ## Known sharp edges
 
