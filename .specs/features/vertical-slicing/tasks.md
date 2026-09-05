@@ -121,9 +121,9 @@ T8
 
 **Done when**:
 
-- [ ] Scoring tests pass: reject keywords, require-any fallback, positive title/tech/domain scoring with criteria.yaml points, remote +10 / EU +8 exclusivity, cap at 100, tier thresholds 70/45
-- [ ] Import-lint test passes (AST-walk of `core/*.py`)
-- [ ] Gate check passes: `poetry run pytest -q` green; test count reported (no silent deletions)
+- [x] Scoring tests pass: reject keywords, require-any fallback, positive title/tech/domain scoring with criteria.yaml points, remote +10 / EU +8 exclusivity, cap at 100, tier thresholds 70/45
+- [x] Import-lint test passes (AST-walk of `core/*.py`)
+- [x] Gate check passes: `poetry run pytest -q` green; test count reported (no silent deletions)
 
 **Tests**: unit
 **Gate**: quick

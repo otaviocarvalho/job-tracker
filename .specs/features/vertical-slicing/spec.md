@@ -172,14 +172,14 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | ARCH-07 | P2: Vertical Feed Slices | Design | Pending |
 | ARCH-08 | P2: Vertical Feed Slices | Design | Pending |
 | ARCH-09 | P2: Vertical Feed Slices | Design | Pending |
-| ARCH-10 | P3: Shared Core | Design | Pending |
+| ARCH-10 | P3: Shared Core | Design | Verified |
 | ARCH-11 | P3: Shared Core | Design | Pending |
 | ARCH-12 | P3: Shared Core | Design | Pending |
 | ARCH-13 | P3: Shared Core | Design | Pending |
 | ARCH-14 | P4: CLI Contract Parity | Design | Pending |
 | ARCH-15 | P4: CLI Contract Parity | Design | Pending |
 | ARCH-16 | P4: CLI Contract Parity | Design | Pending |
-| ARCH-17 | P5: Unit Tests | Design | Pending |
+| ARCH-17 | P5: Unit Tests | Design | Verified |
 | ARCH-18 | P5: Unit Tests | Design | Pending |
 | ARCH-19 | P5: Unit Tests | Design | Pending |
 | ARCH-20 | P5: Unit Tests | Design | Pending |
