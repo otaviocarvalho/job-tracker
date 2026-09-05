@@ -230,10 +230,10 @@ T8
 
 **Done when**:
 
-- [ ] Golden stdout test passes: subprocess `[sys.executable, "main.py", "--source", "ramp", "--dry-run"]` byte-matches the embedded baseline captured pre-refactor
-- [ ] Pipeline tests pass: orchestration order, dry-run skips mark_seen, reset clears store, filter by source name, zero-sources and zero-listings early returns
-- [ ] Legacy dirs gone; `grep -r "src/scrapers\|src/filters\|src/store\|src/output" src/ main.py` returns nothing
-- [ ] Gate check passes: full gate - `poetry run pytest -q` green AND `/usr/bin/python3 main.py --source ramp --dry-run` in the worktree byte-matches baseline
+- [x] Golden stdout test passes: subprocess `[sys.executable, "main.py", "--source", "ramp", "--dry-run"]` byte-matches the embedded baseline captured pre-refactor
+- [x] Pipeline tests pass: orchestration order, dry-run skips mark_seen, reset clears store, filter by source name, zero-sources and zero-listings early returns
+- [x] Legacy dirs gone; `grep -r "src/scrapers\|src/filters\|src/store\|src/output" src/ main.py` returns nothing
+- [x] Gate check passes: full gate - `poetry run pytest -q` green AND `/usr/bin/python3 main.py --source ramp --dry-run` in the worktree byte-matches baseline
 
 **Tests**: unit
 **Gate**: full

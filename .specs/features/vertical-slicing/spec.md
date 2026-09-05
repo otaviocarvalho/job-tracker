@@ -176,24 +176,23 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | ARCH-11 | P3: Shared Core | Design | Verified |
 | ARCH-12 | P3: Shared Core | Design | Verified |
 | ARCH-13 | P3: Shared Core | Design | Verified |
-| ARCH-14 | P4: CLI Contract Parity | Design | Pending |
-| ARCH-15 | P4: CLI Contract Parity | Design | Pending |
-| ARCH-16 | P4: CLI Contract Parity | Design | Pending |
+| ARCH-14 | P4: CLI Contract Parity | Design | Verified |
+| ARCH-15 | P4: CLI Contract Parity | Design | Verified |
+| ARCH-16 | P4: CLI Contract Parity | Design | Verified |
 | ARCH-17 | P5: Unit Tests | Design | Verified |
 | ARCH-18 | P5: Unit Tests | Design | Verified |
 | ARCH-19 | P5: Unit Tests | Design | Verified |
-| ARCH-20 | P5: Unit Tests | Design | Pending |
-| ARCH-21 | P5: Unit Tests | Design | Pending |
-| ARCH-22 | P5: Unit Tests | Design | Pending |
+| ARCH-20 | P5: Unit Tests | Design | Verified |
+| ARCH-21 | P5: Unit Tests | Design | Verified |
+| ARCH-22 | P6: Architecture Documentation | Design | Pending |
 | ARCH-23 | P6: Architecture Documentation | Design | Pending |
 | ARCH-24 | P6: Architecture Documentation | Design | Pending |
-| ARCH-25 | P6: Architecture Documentation | Design | Pending |
 
 **ID format:** `[CATEGORY]-[NUMBER]` (e.g., `AUTH-01`, `CART-03`, `NOTIF-02`)
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 25 total, mapping completed in tasks.md, 0 unmapped
+**Coverage:** 24 total, mapping completed in tasks.md, 0 unmapped
 
 ---
 
