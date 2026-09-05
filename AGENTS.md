@@ -17,6 +17,8 @@ poetry install          # pyyaml (runtime) + pytest (dev)
 poetry run pytest       # must be green before and after any change
 ```
 
+Each checkout binds its own poetry env: run `poetry install` once per clone/worktree (the main checkout and any worktree have separate env keys). On the deploy box the agent shell has a venv active, so poetry binds to it; the commands stay the same.
+
 ## Non-negotiable contracts
 
 1. **Entrypoint**: `main.py` stays at the repo root and bootstraps `src/` onto `sys.path` itself. The cron runs it with the system python: no poetry env, no installed package, no build step. Runtime dependencies: stdlib + PyYAML only.
