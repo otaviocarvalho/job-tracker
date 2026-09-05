@@ -186,13 +186,13 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | ARCH-21 | P5: Unit Tests | Design | Verified |
 | ARCH-22 | P6: Architecture Documentation | Design | Verified |
 | ARCH-23 | P6: Architecture Documentation | Design | Verified |
-| ARCH-24 | P6: Architecture Documentation | Design | Pending |
+| ARCH-24 | P6: Architecture Documentation | Design | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]` (e.g., `AUTH-01`, `CART-03`, `NOTIF-02`)
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 24 total, mapping completed in tasks.md, 0 unmapped
+**Coverage:** 24 total, 24 mapped to tasks and Verified, 0 unmapped
 
 ---
 

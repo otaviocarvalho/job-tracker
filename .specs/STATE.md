@@ -20,7 +20,6 @@ Hermes cron `e61ce479c5ee` runs `cd ~/code/job-tracker && /usr/bin/python3 main.
 
 ## Handoff Snapshot
 
-- **Feature**: vertical-slicing (spec.md, design.md, tasks.md under `.specs/features/vertical-slicing/`)
-- **Branch**: `refactor/vertical-slicing` in worktree `~/code/job-tracker-arch` (main checkout `~/code/job-tracker` untouched; cron fires old-but-green master)
-- **Pre-refactor baselines**: `/tmp/jt_baseline_report.txt` (byte-stable `--source ramp --dry-run` stdout) - also embedded in the golden test
-- **Next step**: execute tasks.md Phase 1
+- **Feature**: vertical-slicing - ALL 8 TASKS COMPLETE (T1-T8), 76 tests passing, golden stdout byte-identical, live full-cycle dry run verified (465 raw listings, 33 scored, 6 strong + 27 worth), production seen.db untouched (106 rows before and after)
+- **Branch**: `refactor/vertical-slicing` in worktree `~/code/job-tracker-arch`; wiki pointer pushed to obsidian-otavio (299205f)
+- **Next step**: Verifier validation, then push branch + ask Otavio about merging to master (cron fires from master)

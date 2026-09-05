@@ -283,9 +283,9 @@ T8
 
 **Done when**:
 
-- [ ] Wiki page diff shows the ARCH.md pointer (git pull --rebase first; commit + push)
-- [ ] Live `--dry-run` full cycle completes: per-source "Got N raw listings" lines present, no tracebacks, digest section formatted, zero listings marked seen (worktree data dir untouched: `data/seen.db` not created in worktree)
-- [ ] Build gate: `poetry run pytest -q` green; worktree git tree clean of unexpected files
+- [x] Wiki page diff shows the ARCH.md pointer (git pull --rebase first; commit + push)
+- [x] Live `--dry-run` full cycle completes: per-source "Got N raw listings" lines present, no tracebacks, digest section formatted, zero listings marked seen (worktree data dir untouched: `data/seen.db` not created in worktree)
+- [x] Build gate: `poetry run pytest -q` green; worktree git tree clean of unexpected files
 
 **Tests**: none
 **Gate**: build
