@@ -173,9 +173,9 @@ T8
 
 **Done when**:
 
-- [ ] Registry tests pass: registration, lookup, dispatch contract (feed receives the whole source dict), unknown-type behavior matches legacy output
-- [ ] `registry.py` imports nothing from `feeds` (covered by import-lint test)
-- [ ] Gate check passes: `poetry run pytest -q` green
+- [x] Registry tests pass: registration, lookup, dispatch contract (feed receives the whole source dict), unknown-type behavior matches legacy output
+- [x] `registry.py` imports nothing from `feeds` (covered by import-lint test)
+- [x] Gate check passes: `poetry run pytest -q` green
 
 **Tests**: unit
 **Gate**: quick
