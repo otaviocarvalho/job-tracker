@@ -8,11 +8,15 @@ Automated job position tracker that scrapes curated startup/tech job sources, fi
 
 ```bash
 cd ~/code/job-tracker
-python main.py              # full cycle
-python main.py --dry-run    # don't mark seen
-python main.py --reset      # clear dedup DB
-python main.py --source HN  # only HN source
+poetry install                        # one-time setup (creates env, installs pyyaml + pytest)
+poetry run python main.py             # full cycle
+poetry run python main.py --dry-run   # don't mark seen
+poetry run python main.py --reset     # clear dedup DB
+poetry run python main.py --source HN # only HN source
+poetry run pytest                     # unit tests
 ```
+
+The Hermes cron does not use poetry: it runs `main.py` directly with the system python (see the cron contract in ARCH.md).
 
 ## Data Feeds
 
@@ -80,9 +84,10 @@ Notes:
 
 ## Architecture
 
-See `~/code/obsidian-otavio/wiki/projects/Job Tracker/Job Tracker.md`
+See [ARCH.md](ARCH.md). It is the architecture doc of record (vertical feed slices, registry, feed contract, cron contract). The Obsidian wiki page (`obsidian-otavio/wiki/projects/Job Tracker`) keeps the curated source wishlist and profile notes and points here for architecture.
 
 ## Dependencies
 
-- Python 3.10+ (stdlib only: urllib, json, sqlite3, xml, argparse)
-- PyYAML (`pip install pyyaml`)
+- Python 3.11+ (stdlib: urllib, json, sqlite3, xml, argparse)
+- PyYAML, declared and locked via poetry (`pyproject.toml` / `poetry.lock`); the cron runs `main.py` with the system python, so PyYAML must stay available there
+- Dev: pytest via the poetry dev group (`poetry run pytest`)

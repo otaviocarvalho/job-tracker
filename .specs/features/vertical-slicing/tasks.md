@@ -257,9 +257,9 @@ T8
 
 **Done when**:
 
-- [ ] `ARCH.md` covers all six required topics (structure, dependency rule, feed contract, add-a-feed steps, cron contract, config roles)
-- [ ] `README.md` no longer references the Obsidian wiki path; links `ARCH.md`
-- [ ] Gate check passes: `poetry run pytest -q` green (docs change breaks nothing)
+- [x] `ARCH.md` covers all six required topics (structure, dependency rule, feed contract, add-a-feed steps, cron contract, config roles)
+- [x] `README.md` no longer references the Obsidian wiki path; links `ARCH.md`
+- [x] Gate check passes: `poetry run pytest -q` green (docs change breaks nothing)
 
 **Tests**: none
 **Gate**: full

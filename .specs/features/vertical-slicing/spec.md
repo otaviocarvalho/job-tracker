@@ -184,8 +184,8 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | ARCH-19 | P5: Unit Tests | Design | Verified |
 | ARCH-20 | P5: Unit Tests | Design | Verified |
 | ARCH-21 | P5: Unit Tests | Design | Verified |
-| ARCH-22 | P6: Architecture Documentation | Design | Pending |
-| ARCH-23 | P6: Architecture Documentation | Design | Pending |
+| ARCH-22 | P6: Architecture Documentation | Design | Verified |
+| ARCH-23 | P6: Architecture Documentation | Design | Verified |
 | ARCH-24 | P6: Architecture Documentation | Design | Pending |
 
 **ID format:** `[CATEGORY]-[NUMBER]` (e.g., `AUTH-01`, `CART-03`, `NOTIF-02`)
