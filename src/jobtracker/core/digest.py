@@ -6,6 +6,12 @@ highlight block on top, then NEW MATCHES when the run found any.
 from datetime import datetime
 
 
+def _shorten(text: str, width: int) -> str:
+    """Display-only truncation with an ellipsis (never mutates listing data)."""
+    text = str(text)
+    return text if len(text) <= width else text[: width - 3] + "..."
+
+
 def merge_highlights(
     tracked: list[dict], current: list[dict], limit: int = 10
 ) -> list[dict]:
@@ -65,8 +71,12 @@ def format_digest(
         for i, h in enumerate(highlights, 1):
             when = h.get("first_seen")
             when = when[:10] if when else "this run"
+            # display-only truncation: HN "Who's Hiring" comments produce
+            # run-on blobs; scoring keeps the full text shape (see AGENTS.md)
+            title = _shorten(h.get("title", "?"), 120)
+            company = _shorten(h.get("company", "?"), 60)
             lines.append(
-                f"{i}. **{h.get('title', '?')}** at **{h.get('company', '?')}** "
+                f"{i}. **{title}** at **{company}** "
                 f"(Score: {h.get('score', 0)}, {when})"
             )
             if h.get("source"):

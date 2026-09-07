@@ -56,6 +56,15 @@ def test_highlight_without_first_seen_is_labeled_this_run():
     assert "(Score: 70, this run)" in out
 
 
+def test_highlight_long_text_is_truncated_for_display_only():
+    blob = "x" * 500
+    out = digest.format_digest(
+        [], highlights=[{"title": blob, "company": blob, "score": 55, "source": "s", "url": "", "first_seen": None}]
+    )
+    assert "x" * 117 + "..." in out  # title capped at 120 chars
+    assert blob not in out
+
+
 def test_empty_highlights_renders_placeholder():
     out = digest.format_digest([])
     assert "Nothing tracked yet." in out
