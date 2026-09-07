@@ -71,8 +71,13 @@ def test_second_run_dedups_to_nothing(monkeypatch, capsys):
     pipeline.run()
     out = pipeline.run()
 
-    assert out is None
+    # the report is always rendered, but with no NEW MATCHES section;
+    # the first-run listing now shows up in the 90-day highlights instead
+    assert out is not None
     assert "No new listings. Done." in capsys.readouterr().out
+    assert "No new matches this run" in out
+    assert "Staff Platform Engineer" in out  # highlight from seen.db
+    assert "**NEW MATCHES**" not in out
 
 
 def test_reset_clears_dedup_state(monkeypatch, capsys):
@@ -80,8 +85,9 @@ def test_reset_clears_dedup_state(monkeypatch, capsys):
     monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES)
     monkeypatch.setattr(pipeline, "scrape_source", lambda s: [])
 
-    assert pipeline.run(reset=True) is None
+    out = pipeline.run(reset=True)
 
+    assert out is not None  # report still renders after a reset
     assert seen.is_seen("https://jobs/strong") is False
     assert "Clearing dedup database..." in capsys.readouterr().out
 
@@ -102,7 +108,10 @@ def test_phase_order_scrape_score_dedup_digest_mark(monkeypatch):
     monkeypatch.setattr(pipeline, "scrape_source", lambda s: events.append("scrape") or [dict(STRONG)])
     monkeypatch.setattr(pipeline.matcher, "filter_and_score", lambda ls: events.append("score") or ls)
     monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls: events.append("dedup") or ls)
-    monkeypatch.setattr(pipeline.digest, "format_digest", lambda ls: events.append("digest") or "DIGEST")
+    monkeypatch.setattr(
+        pipeline.digest, "format_digest",
+        lambda ls, highlights=None, notes="": events.append("digest") or "DIGEST",
+    )
     monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls: events.append("mark"))
 
     pipeline.run()
@@ -116,7 +125,10 @@ def test_dry_run_phase_order_skips_mark(monkeypatch):
     monkeypatch.setattr(pipeline, "scrape_source", lambda s: events.append("scrape") or [dict(STRONG)])
     monkeypatch.setattr(pipeline.matcher, "filter_and_score", lambda ls: events.append("score") or ls)
     monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls: events.append("dedup") or ls)
-    monkeypatch.setattr(pipeline.digest, "format_digest", lambda ls: events.append("digest") or "DIGEST")
+    monkeypatch.setattr(
+        pipeline.digest, "format_digest",
+        lambda ls, highlights=None, notes="": events.append("digest") or "DIGEST",
+    )
     monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls: events.append("mark"))
 
     pipeline.run(dry_run=True)

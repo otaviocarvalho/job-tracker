@@ -49,23 +49,24 @@ The tracker runs on a Hermes cron job (runs on this machine via the gateway daem
 Tell Hermes in any session:
 
 ```
-Every day at 8am, run the job tracker and deliver the digest if there are
-new matches. Execute: cd ~/code/job-tracker && .venv/bin/python main.py
-2>/dev/null. If the output contains a "DIGEST" section with job listings,
-send the digest text as-is. If it says "No new listings", send nothing
-(stay silent). Do NOT send debug output or scraping logs.
+Every 6 hours, run the job tracker and deliver the report. Execute:
+cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null. Send everything
+from the "DIGEST" header onward as-is: it always carries the execution notes
+line and the top-scores highlight of the last 90 days; a "NEW MATCHES" section
+appears only when there are new listings. Respond [SILENT] only if the command
+fails or prints no DIGEST section. Do NOT send debug output or scraping logs.
 ```
 
 ### Option B: CLI slash command (exact, as currently deployed)
 
 ```
-/cron add "0 8 * * *" "Run the job tracker and deliver the digest if there are new matches.
+/cron add "0 */6 * * *" "Run the job tracker and deliver the report.
 
 Execute: \`cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null\`
 
-If the output contains \"DIGEST\" section with job listings, send the digest text as-is.
-If the output says \"No new listings\" or \"No listings above threshold\", send nothing (stay silent).
-Do NOT send debug output or scraping logs — only send the formatted digest that appears after the \"DIGEST\" header."
+Send everything from the \"DIGEST\" header onward, as-is: the report always includes the execution notes line and the top-scores highlight of the last 90 days; a NEW MATCHES section appears only when there are new listings.
+If the command fails or prints no DIGEST section, respond with exactly \"[SILENT]\".
+Do NOT send debug output or scraping logs."
 ```
 
 Notes:

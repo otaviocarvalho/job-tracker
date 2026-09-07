@@ -69,3 +69,42 @@ def test_clear_all_wipes_state():
     seen.mark_seen("https://jobs/1", "One")
     seen.clear_all()
     assert seen.is_seen("https://jobs/1") is False
+
+
+def _backdate(url: str, days: int):
+    conn = sqlite3.connect(str(seen._db_path()))
+    try:
+        conn.execute(
+            "UPDATE seen SET first_seen = datetime('now', ?) WHERE url = ?",
+            (f"-{days} days", url),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_top_scores_orders_by_score_and_filters_window():
+    seen.mark_seen("https://jobs/a", "A", company="Acme", source="s", score=60)
+    seen.mark_seen("https://jobs/b", "B", company="Beta", source="s", score=90)
+    seen.mark_seen("https://jobs/c", "C", company="Gamma", source="s", score=99)
+    _backdate("https://jobs/c", 120)  # first seen outside the 90-day window
+
+    top = seen.top_scores(days=90, limit=10)
+
+    assert [t["title"] for t in top] == ["B", "A"]
+    assert top[0]["company"] == "Beta"
+    assert top[0]["first_seen"]  # timestamp string present for the digest
+
+
+def test_top_scores_respects_limit():
+    for i in range(15):
+        seen.mark_seen(f"https://jobs/{i}", f"T{i}", score=i)
+
+    top = seen.top_scores(days=90, limit=5)
+
+    assert len(top) == 5
+    assert top[0]["title"] == "T14"  # highest score first
+
+
+def test_top_scores_empty_db_returns_empty_list(isolated_db):
+    assert seen.top_scores() == []

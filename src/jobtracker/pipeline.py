@@ -36,19 +36,18 @@ def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
 
     if not all_listings:
         print("No listings found. Done.")
-        return
+        scored = []
+    else:
+        # Phase 2: Filter and score
+        print(f"\n{'='*60}")
+        print("Scoring and filtering...")
+        print(f"{'='*60}")
 
-    # Phase 2: Filter and score
-    print(f"\n{'='*60}")
-    print("Scoring and filtering...")
-    print(f"{'='*60}")
+        scored = matcher.filter_and_score(all_listings)
+        print(f"After scoring: {len(scored)} listings above threshold")
 
-    scored = matcher.filter_and_score(all_listings)
-    print(f"After scoring: {len(scored)} listings above threshold")
-
-    if not scored:
-        print("No listings above threshold. Done.")
-        return
+        if not scored:
+            print("No listings above threshold. Done.")
 
     # Phase 3: Dedup
     print(f"\n{'='*60}")
@@ -60,21 +59,27 @@ def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
 
     if not new_listings:
         print("No new listings. Done.")
-        return
+    else:
+        # Sort by score descending
+        new_listings.sort(key=lambda l: l.get("score", 0), reverse=True)
 
-    # Sort by score descending
-    new_listings.sort(key=lambda l: l.get("score", 0), reverse=True)
+    # Phase 4: Output - the report always carries execution notes and the
+    # 90-day top-scores highlight, even on a run with zero new matches.
+    highlights = digest.merge_highlights(seen.top_scores(days=90, limit=10), scored)
+    notes = (
+        f"Run: {len(sources)} source(s) | {len(all_listings)} raw | "
+        f"{len(scored)} above threshold | {len(new_listings)} new"
+    )
 
-    # Phase 4: Output
     print(f"\n{'='*60}")
     print("DIGEST")
     print(f"{'='*60}\n")
 
-    output = digest.format_digest(new_listings)
+    output = digest.format_digest(new_listings, highlights=highlights, notes=notes)
     print(output)
 
     # Mark as seen (unless dry run)
-    if not dry_run:
+    if not dry_run and new_listings:
         seen.mark_all_seen(new_listings)
         print(f"\nMarked {len(new_listings)} listings as seen.")
 

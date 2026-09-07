@@ -82,6 +82,30 @@ def mark_all_seen(listings: list[dict]):
         )
 
 
+def top_scores(days: int = 90, limit: int = 10) -> list[dict]:
+    """Highest-scored listings first seen within the last `days` days.
+
+    Feeds the digest highlights: everything above threshold ever marked
+    seen lives in this table with its score, so this is the 90-day leaderboard.
+    """
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            """
+            SELECT title, company, source, score, url, first_seen
+            FROM seen
+            WHERE first_seen >= datetime('now', ?)
+            ORDER BY score DESC, first_seen DESC
+            LIMIT ?
+            """,
+            (f"-{int(days)} days", int(limit)),
+        )
+        cols = ("title", "company", "source", "score", "url", "first_seen")
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
+    finally:
+        conn.close()
+
+
 def clear_all():
     """Wipe the dedup table (for testing/reset)."""
     conn = _connect()

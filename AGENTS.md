@@ -22,7 +22,7 @@ Each checkout binds its own venv: run `poetry install` once per clone/worktree (
 ## Non-negotiable contracts
 
 1. **Entrypoint**: `main.py` stays at the repo root and bootstraps `src/` onto `sys.path` itself. The cron runs `.venv/bin/python main.py` (poetry in-project venv; recreate with `poetry install` if missing). Runtime dependencies: stdlib + PyYAML only. System python (with PyYAML) remains a working fallback.
-2. **Stdout is frozen**: the cron greps output for the digest section. Do not reword, reformat, or add output. If a change to output wording is truly required, regenerate the golden constants in `tests/test_cli.py` and update the cron prompt in README.md in the same change.
+2. **Stdout ends in the report**: every run finishes with a DIGEST block (execution notes + 90-day top-scores highlights, then NEW MATCHES when there are any). The cron relays everything from the DIGEST header onward. If a change to output wording is truly required, regenerate the golden constants in `tests/test_cli.py` and update the cron prompt in README.md in the same change.
 3. **Dedup state is precious**: a real run marks listings seen irreversibly. Test with `--dry-run` first. Never read or write `data/seen.db` from tests or throwaway runs; set `JOBTRACKER_DATA_DIR` to a temp dir instead.
 4. **Dependency rule**: `core/` never imports `feeds/`, `registry`, `pipeline`, or `cli` (enforced by `tests/core/test_imports.py`). `registry` never imports `feeds` (registration flows through the decorator). `feeds/` may use `core` and `registry`.
 5. **Feeds never raise**: on any error, print `  [<feed>:<id>] Error: ...` and return `[]`. One dead feed must not kill the digest.
