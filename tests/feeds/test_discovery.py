@@ -5,7 +5,7 @@ from pathlib import Path
 import jobtracker.feeds as feeds
 import jobtracker.registry as registry
 
-EXPECTED_TYPES = ["greenhouse", "hackernews", "infranyc", "report", "speedrun", "substack", "ycombinator"]
+EXPECTED_TYPES = ["ashby", "greenhouse", "hackernews", "infranyc", "report", "speedrun", "substack", "ycombinator"]
 
 
 def test_all_builtin_feed_types_registered():

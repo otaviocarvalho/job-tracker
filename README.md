@@ -35,8 +35,32 @@ Active sources (see `config/sources.yaml`):
 | 9 | Ramp Vendor Reports | Manual/periodic check | ramp.com/data |
 | 10 | Harmonic Hot 25 | Manual/periodic check | harmonic.ai/hot-25-startups |
 | 11 | Founders You Should Know | Manual/periodic check | foundersysk.com |
+| 12 | Anthropic | Greenhouse API | `board: anthropic` (trending) |
+| 13 | Databricks | Greenhouse API | `board: databricks` (trending) |
+| 14 | Stripe | Greenhouse API | `board: stripe` (trending) |
+| 15 | GitLab | Greenhouse API | `board: gitlab` (trending) |
+| 16 | Vercel | Greenhouse API | `board: vercel` (trending) |
+| 17 | Together AI | Greenhouse API | `board: togetherai` (trending) |
+| 18 | OpenAI | Ashby SSR payload | jobs.ashbyhq.com/openai (trending) |
+| 19 | ElevenLabs | Ashby SSR payload | jobs.ashbyhq.com/elevenlabs (trending) |
+| 20 | Lovable | Ashby SSR payload | jobs.ashbyhq.com/lovable (trending) |
+| 21 | Perplexity | Ashby SSR payload | jobs.ashbyhq.com/perplexity (trending) |
+| 22 | Harvey | Ashby SSR payload | jobs.ashbyhq.com/harvey (trending) |
+| 23 | Polymarket | Ashby SSR payload | jobs.ashbyhq.com/polymarket (trending) |
+| 24 | Replit | Ashby SSR payload | jobs.ashbyhq.com/replit (trending) |
+| 25 | Anysphere (Cursor) | Manual check (captcha-gated) | cursor.com/careers |
+| 26 | Kraken | Manual check (own ATS) | jobs.kraken.com |
+| 27 | Revolut | Manual check (own ATS) | revolut.com/careers |
+| 28 | ByteDance | Manual check (own ATS) | jobs.bytedance.com |
+| 29 | Klarna | Manual check (own ATS) | klarna.com/careers |
+| 30 | Canva | Manual check (own ATS) | canva.com/careers |
+| 31 | Snyk | Manual check (own ATS) | careers.snyk.io |
+| 32 | Hugging Face | Manual check (own ATS) | huggingface.co/Company/jobs |
+| 33 | Deel | Manual check (empty Ashby board) | deel.com/careers |
 
 Removed 2026-08-30: Sequoia, Index Ventures, Greylock Greenhouse boards (all 404; their job sites moved to JS-rendered ATS with no public API).
+
+**Trending companies** (AD-0006): Setter30 late-stage pre-IPO watchlist added 2026-09-18. Sources with `config.trending: true` render under their own **TRENDING COMPANIES** digest section; companies with no recurrently scrapeable board (`type: report` + `trending: true`) render as a **TRENDING MANUAL CHECK** block (name + careers URL) so they still get explored by hand. Tier sections display at most 10 matches each with a `(+N more above threshold, not shown)` footer (display-only truncation).
 
 Manual-check sources (`type: report`) are listed for reference only; they are not scraped automatically.
 

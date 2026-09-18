@@ -110,7 +110,7 @@ def test_phase_order_scrape_score_dedup_digest_mark(monkeypatch):
     monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls: events.append("dedup") or ls)
     monkeypatch.setattr(
         pipeline.digest, "format_digest",
-        lambda ls, highlights=None, notes="": events.append("digest") or "DIGEST",
+        lambda ls, highlights=None, notes="", trending=None, trending_manual=None: events.append("digest") or "DIGEST",
     )
     monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls: events.append("mark"))
 
@@ -127,7 +127,7 @@ def test_dry_run_phase_order_skips_mark(monkeypatch):
     monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls: events.append("dedup") or ls)
     monkeypatch.setattr(
         pipeline.digest, "format_digest",
-        lambda ls, highlights=None, notes="": events.append("digest") or "DIGEST",
+        lambda ls, highlights=None, notes="", trending=None, trending_manual=None: events.append("digest") or "DIGEST",
     )
     monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls: events.append("mark"))
 

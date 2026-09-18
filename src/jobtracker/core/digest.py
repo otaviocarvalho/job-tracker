@@ -47,18 +47,21 @@ def format_digest(
     listings: list[dict],
     highlights: list[dict] | None = None,
     notes: str = "",
+    trending: list[dict] | None = None,
+    trending_manual: list[dict] | None = None,
 ) -> str:
     """Format the full run report as markdown.
 
     Always contains the execution-notes line and the highlights block
     (top scores of the last 90 days), even when there are no new matches.
-    NEW MATCHES (strong first, then worth a look) appears only when the
-    run found new listings.
+    TRENDING COMPANIES (new matches from trending sources) and the MANUAL
+    CHECK block render when the run has them. NEW MATCHES (strong first,
+    then worth a look) covers the non-trending new listings and appears
+    only when the run found any.
     """
     highlights = highlights or []
-
-    strong = [l for l in listings if l.get("tier") == "strong"]
-    worth = [l for l in listings if l.get("tier") == "worth"]
+    trending = trending or []
+    trending_manual = trending_manual or []
 
     lines = []
     lines.append(f"Job Tracker Digest - {datetime.now().strftime('%b %d, %H:%M')}")
@@ -87,15 +90,12 @@ def format_digest(
         lines.append("Nothing tracked yet.")
     lines.append("")
 
-    if not listings:
+    if not trending and not trending_manual and not listings:
         lines.append(
             "No new matches this run: everything above threshold was already reported."
         )
         lines.append("")
         return "\n".join(lines)
-
-    lines.append("**NEW MATCHES**")
-    lines.append("")
 
     def format_listing(l: dict, idx: int) -> list[str]:
         parts = []
@@ -127,16 +127,48 @@ def format_digest(
         parts.append("")
         return parts
 
-    if strong:
-        lines.append("**STRONG MATCH**")
-        lines.append("")
-        for i, l in enumerate(strong, 1):
-            lines.extend(format_listing(l, i))
+    def render_tier_sections(items: list[dict]) -> list[str]:
+        # Display-only truncation (same policy as the highlights block):
+        # scoring and dedup keep the full shape, the digest shows the top
+        # matches per tier so the report stays readable/deliverable.
+        max_shown = 10
+        out = []
+        for tier, header in (("strong", "**STRONG MATCH**"), ("worth", "**WORTH A LOOK**")):
+            tier_items = [l for l in items if l.get("tier") == tier]
+            if not tier_items:
+                continue
+            out.append(header)
+            out.append("")
+            for i, l in enumerate(tier_items[:max_shown], 1):
+                out.extend(format_listing(l, i))
+            hidden = len(tier_items) - max_shown
+            if hidden > 0:
+                out.append(f"(+{hidden} more above threshold, not shown)")
+                out.append("")
+        return out
 
-    if worth:
-        lines.append("**WORTH A LOOK**")
+    if trending:
+        lines.append("**TRENDING COMPANIES** (Setter30)")
         lines.append("")
-        for i, l in enumerate(worth, 1):
-            lines.extend(format_listing(l, i))
+        lines.extend(render_tier_sections(trending))
+
+    if trending_manual:
+        lines.append(
+            "**TRENDING MANUAL CHECK** (no public API / captcha-gated; browse by hand)"
+        )
+        lines.append("")
+        for m in trending_manual:
+            lines.append(f"- {m.get('name', '?')}: {m.get('url', '')}")
+        lines.append("")
+
+    if listings:
+        lines.append("**NEW MATCHES**")
+        lines.append("")
+        lines.extend(render_tier_sections(listings))
+    else:
+        lines.append(
+            "No new non-trending matches this run: everything above threshold was already reported."
+        )
+        lines.append("")
 
     return "\n".join(lines)

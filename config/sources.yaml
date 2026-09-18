@@ -63,3 +63,153 @@ sources:
   - name: "Founders You Should Know"
     type: report
     url: https://foundersysk.com
+
+  # --- Trending companies: Setter30 late-stage pre-IPO list (added 2026-09-18) ---
+  # Boards verified live and scrapeable (Greenhouse public API / Ashby SSR payload).
+  - name: "Anthropic"
+    type: greenhouse
+    config:
+      board: anthropic
+      trending: true
+    url: https://boards.greenhouse.io/anthropic
+
+  - name: "Databricks"
+    type: greenhouse
+    config:
+      board: databricks
+      trending: true
+    url: https://boards.greenhouse.io/databricks
+
+  - name: "Stripe"
+    type: greenhouse
+    config:
+      board: stripe
+      trending: true
+    url: https://boards.greenhouse.io/stripe
+
+  - name: "GitLab"
+    type: greenhouse
+    config:
+      board: gitlab
+      trending: true
+    url: https://boards.greenhouse.io/gitlab
+
+  - name: "Vercel"
+    type: greenhouse
+    config:
+      board: vercel
+      trending: true
+    url: https://boards.greenhouse.io/vercel
+
+  - name: "Together AI"
+    type: greenhouse
+    config:
+      board: togetherai
+      trending: true
+    url: https://boards.greenhouse.io/togetherai
+
+  - name: "OpenAI"
+    type: ashby
+    config:
+      board: openai
+      trending: true
+    url: https://jobs.ashbyhq.com/openai
+
+  - name: "ElevenLabs"
+    type: ashby
+    config:
+      board: elevenlabs
+      trending: true
+    url: https://jobs.ashbyhq.com/elevenlabs
+
+  - name: "Lovable"
+    type: ashby
+    config:
+      board: lovable
+      trending: true
+    url: https://jobs.ashbyhq.com/lovable
+
+  - name: "Perplexity"
+    type: ashby
+    config:
+      board: perplexity
+      trending: true
+    url: https://jobs.ashbyhq.com/perplexity
+
+  - name: "Harvey"
+    type: ashby
+    config:
+      board: harvey
+      trending: true
+    url: https://jobs.ashbyhq.com/harvey
+
+  - name: "Polymarket"
+    type: ashby
+    config:
+      board: polymarket
+      trending: true
+    url: https://jobs.ashbyhq.com/polymarket
+
+  - name: "Replit"
+    type: ashby
+    config:
+      board: replit
+      trending: true
+    url: https://jobs.ashbyhq.com/replit
+
+  # --- Trending MANUAL CHECK: no recurrently scrapeable board (captcha-gated
+  # SPA, empty/filtered ATS board, or own careers site with no public API).
+  # Surfaced in the digest so they get explored by hand periodically.
+  - name: "Anysphere (Cursor)"
+    type: report
+    config:
+      trending: true
+    url: https://cursor.com/careers
+
+  - name: "Kraken"
+    type: report
+    config:
+      trending: true
+    url: https://jobs.kraken.com
+
+  - name: "Revolut"
+    type: report
+    config:
+      trending: true
+    url: https://www.revolut.com/careers/
+
+  - name: "ByteDance"
+    type: report
+    config:
+      trending: true
+    url: https://jobs.bytedance.com/en/
+
+  - name: "Klarna"
+    type: report
+    config:
+      trending: true
+    url: https://www.klarna.com/careers/
+
+  - name: "Canva"
+    type: report
+    config:
+      trending: true
+    url: https://www.canva.com/careers/
+
+  - name: "Snyk"
+    type: report
+    config:
+      trending: true
+    url: https://careers.snyk.io/
+
+  - name: "Hugging Face"
+    type: report
+    config:
+      trending: true
+    url: https://huggingface.co/Company/jobs
+
+  - name: "Deel"
+    type: report
+    config:
+      trending: true
+    url: https://www.deel.com/careers/open-roles/

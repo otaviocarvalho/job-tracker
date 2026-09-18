@@ -42,7 +42,8 @@ job-tracker/
     │   └── digest.py          # markdown digest renderer
     └── feeds/                 # VERTICAL SLICES: one self-contained module per feed type
         ├── __init__.py        # pkgutil auto-discovery: imports every module below
-        ├── greenhouse.py      # Greenhouse boards API (a16z portfolio)
+        ├── ashby.py           # Ashby boards SSR payload (Setter30 trending: OpenAI, ElevenLabs, ...)
+        ├── greenhouse.py      # Greenhouse boards API (a16z portfolio + Setter30 trending)
         ├── hackernews.py      # HN "Who's Hiring" via Algolia
         ├── infranyc.py        # infra.nyc (Next.js RSC payload extraction)
         ├── report.py          # manual-review sources (Ramp, Harmonic, FYSK): no scraping
@@ -89,7 +90,7 @@ That is the whole integration: one new module + one YAML line.
 1. **Scrape** every source from `sources.yaml` (optionally filtered by `--source <name substring>`, case-insensitive) via `registry.scrape_source`. Unknown types print `  Unknown source type: <type>` and contribute nothing.
 2. **Score** with `core.scoring` against `criteria.yaml`: hard rejects (frontend/EM/devops...), require-any title keyword, positive title/tech/domain points, remote +10 / EU +8, capped at 100. Tiers: strong >= 70, worth >= 45; only those survive.
 3. **Dedup** with `core.seen` (SQLite by URL hash; empty URLs hash too).
-4. **Digest** sorted by score desc, grouped STRONG MATCH then WORTH A LOOK.
+4. **Digest** sorted by score desc: TRENDING COMPANIES (sources flagged `config.trending`), the TRENDING MANUAL CHECK block (report-type trending sources), then NEW MATCHES for the rest; each family grouped STRONG MATCH then WORTH A LOOK, capped at 10 shown per tier (display-only).
 5. **Mark seen** unless `--dry-run`. `--reset` wipes dedup state first.
 
 ## The cron contract (do not break)
@@ -98,12 +99,12 @@ The Hermes job runs `cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/nu
 
 - `main.py` stays at the repo root and bootstraps `src/` onto `sys.path` itself.
 - The interpreter is the repo's poetry-managed venv: `poetry.toml` (committed) pins `virtualenvs.in-project = true`, so `poetry install` creates/syncs `.venv` with PyYAML locked by `poetry.lock`. If `.venv` is missing or stale, `poetry install` recreates it; a cron failure with a missing interpreter means "run poetry install".
-- Stdout always ends in the DIGEST report: execution notes + the 90-day top-scores highlight on top, NEW MATCHES only when the run found new listings. `tests/test_cli.py` byte-matches golden captures of `--source ramp --dry-run` (deterministic: report feed, no network, no dedup writes; only the wall-clock timestamp in the digest header is masked). If you intentionally change output wording, regenerate the goldens and update the cron prompt in the same change.
+- Stdout always ends in the DIGEST report: execution notes + the 90-day top-scores highlight on top, then (when present) TRENDING COMPANIES + TRENDING MANUAL CHECK, then NEW MATCHES only when the run found new listings. A plain no-trending, no-listings run renders the original wording byte-identically (that is what the goldens capture). `tests/test_cli.py` byte-matches golden captures of `--source ramp --dry-run` (deterministic: report feed, no network, no dedup writes; only the wall-clock timestamp in the digest header is masked). If you intentionally change output wording, regenerate the goldens and update the cron prompt in the same change.
 - Fallback: `main.py` still runs with the system python because runtime deps are stdlib + PyYAML (present for the system interpreter). The venv is the supported path (AD-0005 supersedes AD-0002's interpreter clause).
 
 ## Testing
 
-- `poetry install` once, then `poetry run pytest` (76 tests).
+- `poetry install` once, then `poetry run pytest` (94 tests).
 - The suite never touches the network: every feed test mocks `urllib.request.urlopen` or tests pure parse helpers.
 - The suite never touches the production `data/seen.db`: set `JOBTRACKER_DATA_DIR` (all store/pipeline tests do; it overrides the data directory at call time).
 - Golden CLI tests double as the cron-contract gate; run the full check with `.venv/bin/python main.py --source ramp --dry-run` and compare against the embedded golden in `tests/test_cli.py`.

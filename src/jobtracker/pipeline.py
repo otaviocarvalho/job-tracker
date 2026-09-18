@@ -65,6 +65,21 @@ def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
 
     # Phase 4: Output - the report always carries execution notes and the
     # 90-day top-scores highlight, even on a run with zero new matches.
+    # Sources flagged config.trending (Setter30 boards) get their own digest
+    # section; report-type trending sources become the MANUAL CHECK block.
+    trending_names = {
+        s["name"]
+        for s in sources
+        if (s.get("config") or {}).get("trending")
+    }
+    trending_new = [l for l in new_listings if l.get("source") in trending_names]
+    other_new = [l for l in new_listings if l.get("source") not in trending_names]
+    trending_manual = [
+        {"name": s["name"], "url": s.get("url", "")}
+        for s in sources
+        if s.get("type") == "report" and (s.get("config") or {}).get("trending")
+    ]
+
     highlights = digest.merge_highlights(seen.top_scores(days=90, limit=10), scored)
     notes = (
         f"Run: {len(sources)} source(s) | {len(all_listings)} raw | "
@@ -75,7 +90,13 @@ def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
     print("DIGEST")
     print(f"{'='*60}\n")
 
-    output = digest.format_digest(new_listings, highlights=highlights, notes=notes)
+    output = digest.format_digest(
+        other_new,
+        highlights=highlights,
+        notes=notes,
+        trending=trending_new,
+        trending_manual=trending_manual,
+    )
     print(output)
 
     # Mark as seen (unless dry run)
