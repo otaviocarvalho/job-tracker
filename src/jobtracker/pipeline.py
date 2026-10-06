@@ -11,6 +11,35 @@ from jobtracker.core.config import load_sources
 from jobtracker.registry import scrape_source
 
 
+def filter_by_location(source: dict, listings: list[dict]) -> list[dict]:
+    """Per-source location gate: config.location_include substrings (AD-0007).
+
+    When a source entry sets `config.location_include` (list of strings),
+    only listings whose `location` field contains at least one of them
+    (case-insensitive) survive. Sources without the key are untouched.
+    Feed-level filter on purpose: unwanted geographies never reach scoring,
+    dedup, or the digest.
+    """
+    patterns = [
+        str(p).lower()
+        for p in ((source.get("config") or {}).get("location_include") or [])
+    ]
+    if not patterns:
+        return listings
+    kept = [
+        l
+        for l in listings
+        if any(p in str(l.get("location") or "").lower() for p in patterns)
+    ]
+    dropped = len(listings) - len(kept)
+    if dropped:
+        print(
+            f"  Location filter ({source.get('name', '?')}): "
+            f"kept {len(kept)}, dropped {dropped} outside {patterns}"
+        )
+    return kept
+
+
 def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
     if reset:
         print("Clearing dedup database...")
@@ -30,6 +59,7 @@ def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
         print(f"\n> {source['name']} ({source['type']})")
         listings = scrape_source(source)
         print(f"  Got {len(listings)} raw listings")
+        listings = filter_by_location(source, listings)
         all_listings.extend(listings)
 
     print(f"\nTotal raw listings: {len(all_listings)}")

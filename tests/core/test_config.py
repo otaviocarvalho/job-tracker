@@ -11,11 +11,12 @@ def test_repo_root_resolves_to_repo_layout():
 
 def test_load_sources_returns_all_registered_sources():
     sources = config.load_sources()
-    assert len(sources) == 33  # 21 scraped feed entries + 12 manual/report sources
+    assert len(sources) == 34  # 22 scraped feed entries + 12 manual/report sources
     assert sources[0]["name"] == "a16z Portfolio"
     names = [s["name"] for s in sources]
     assert "HN Who's Hiring" in names
     assert "infra.nyc" in names
+    assert "xAI" in names  # AD-0007: London/EMEA/remote watchlist entry
 
 
 def test_load_sources_entries_carry_type_and_url():
@@ -25,9 +26,20 @@ def test_load_sources_entries_carry_type_and_url():
     assert entry["url"].startswith("https://")
 
 
+def test_xai_source_carries_location_include_filter():
+    entry = next(s for s in config.load_sources() if s["name"] == "xAI")
+    assert entry["config"]["board"] == "xai"
+    assert entry["config"]["trending"] is True
+    patterns = [p.lower() for p in entry["config"]["location_include"]]
+    assert "london" in patterns and "emea" in patterns
+    assert "remote international" in patterns
+    assert "remote us" not in patterns  # US-only remote stays out
+
+
 def test_load_criteria_values_used_by_scoring():
     c = config.load_criteria()
     assert c["strong_match_threshold"] == 70
     assert c["worth_a_look_threshold"] == 45
     assert c["positive_title_keywords"]["staff"] == 20
     assert "frontend" in c["reject_title_keywords"]
+    assert c["digest_max_per_company"] == 3

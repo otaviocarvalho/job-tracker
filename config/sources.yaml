@@ -157,6 +157,23 @@ sources:
       trending: true
     url: https://jobs.ashbyhq.com/replit
 
+  - name: "xAI"
+    type: greenhouse
+    config:
+      board: xai
+      trending: true
+      # 2026-10-06: board has 300+ jobs, mostly Memphis/Palo Alto; Otavio
+      # wants London/EMEA + Remote International only (added 2026-10-06).
+      location_include:
+        - london
+        - united kingdom
+        - ireland
+        - dublin
+        - emea
+        - europe
+        - remote international
+    url: https://boards.greenhouse.io/xai
+
   # --- Trending MANUAL CHECK: no recurrently scrapeable board (captcha-gated
   # SPA, empty/filtered ATS board, or own careers site with no public API).
   # Surfaced in the digest so they get explored by hand periodically.

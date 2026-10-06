@@ -119,6 +119,47 @@ def test_phase_order_scrape_score_dedup_digest_mark(monkeypatch):
     assert events == ["scrape", "score", "dedup", "digest", "mark"]
 
 
+def test_filter_by_location_passes_through_without_config():
+    src = {"name": "S1", "type": "t1", "url": "u1"}
+    listings = [dict(STRONG), dict(WORTH)]
+    assert pipeline.filter_by_location(src, listings) == listings
+
+
+def test_filter_by_location_keeps_matching_locations_only(capsys):
+    src = {
+        "name": "xAI",
+        "type": "greenhouse",
+        "url": "u",
+        "config": {"location_include": ["london", "remote international"]},
+    }
+    keep = dict(STRONG) | {"location": "London, England, United Kingdom"}
+    drop = dict(STRONG) | {"url": "https://jobs/far", "location": "Palo Alto, CA"}
+    out = pipeline.filter_by_location(src, [keep, drop])
+
+    assert [l["url"] for l in out] == ["https://jobs/strong"]
+    assert "kept 1, dropped 1" in capsys.readouterr().out
+
+
+def test_location_filter_runs_inside_pipeline(monkeypatch):
+    # Listings outside the configured geographies never reach scoring,
+    # dedup, or the digest.
+    src = {
+        "name": "Geo",
+        "type": "t1",
+        "url": "u",
+        "config": {"location_include": ["remote"]},
+    }
+    far = dict(STRONG) | {"url": "https://jobs/far", "location": "Memphis, TN"}
+    monkeypatch.setattr(pipeline, "load_sources", lambda: [src])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [far, dict(STRONG)])
+
+    out = pipeline.run()
+
+    assert "https://jobs/far" not in out
+    assert seen.is_seen("https://jobs/far") is False
+    assert seen.is_seen("https://jobs/strong") is True
+
+
 def test_dry_run_phase_order_skips_mark(monkeypatch):
     events = []
     monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])

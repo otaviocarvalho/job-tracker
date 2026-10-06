@@ -57,10 +57,13 @@ Active sources (see `config/sources.yaml`):
 | 31 | Snyk | Manual check (own ATS) | careers.snyk.io |
 | 32 | Hugging Face | Manual check (own ATS) | huggingface.co/Company/jobs |
 | 33 | Deel | Manual check (empty Ashby board) | deel.com/careers |
+| 34 | xAI | Greenhouse API | `board: xai` (trending; `location_include` London/EMEA/Remote International) |
 
 Removed 2026-08-30: Sequoia, Index Ventures, Greylock Greenhouse boards (all 404; their job sites moved to JS-rendered ATS with no public API).
 
-**Trending companies** (AD-0006): Setter30 late-stage pre-IPO watchlist added 2026-09-18. Sources with `config.trending: true` render under their own **TRENDING COMPANIES** digest section; companies with no recurrently scrapeable board (`type: report` + `trending: true`) render as a **TRENDING MANUAL CHECK** block (name + careers URL) so they still get explored by hand. Tier sections display at most 10 matches each with a `(+N more above threshold, not shown)` footer (display-only truncation).
+**Trending companies** (AD-0006): Setter30 late-stage pre-IPO watchlist added 2026-09-18. Sources with `config.trending: true` render under their own **TRENDING COMPANIES** digest section; companies with no recurrently scrapeable board (`type: report` + `trending: true`) render as a **TRENDING MANUAL CHECK** block (name + careers URL) so they still get explored by hand. Tier sections display at most 10 matches each, and at most `digest_max_per_company` (criteria.yaml, default 3) entries per company — the highest-scored ones — so a single employer cannot flood a section; the rest count toward the `(+N more above threshold, not shown)` footer (all truncation is display-only).
+
+**Per-source location filter** (AD-0007, added 2026-10-06): a source entry may set `config.location_include` (list of substrings); the pipeline then keeps only listings whose `location` field matches at least one substring, case-insensitively, before scoring/dedup. Used for xAI (`london`, `united kingdom`, `ireland`, `dublin`, `emea`, `europe`, `remote international`) so its 300-job board contributes only the geographies Otavio actually wants.
 
 Manual-check sources (`type: report`) are listed for reference only; they are not scraped automatically.
 
