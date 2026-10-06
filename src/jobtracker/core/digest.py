@@ -5,11 +5,42 @@ highlight block on top, then NEW MATCHES when the run found any.
 """
 from datetime import datetime
 
+from .config import load_criteria
+
+_FALLBACK_MAX_PER_COMPANY = 3
+
+
+def _default_max_per_company() -> int:
+    """criteria.yaml `digest_max_per_company`, or 3 if unreadable."""
+    try:
+        return int(load_criteria().get("digest_max_per_company", _FALLBACK_MAX_PER_COMPANY))
+    except Exception:
+        return _FALLBACK_MAX_PER_COMPANY
+
 
 def _shorten(text: str, width: int) -> str:
     """Display-only truncation with an ellipsis (never mutates listing data)."""
     text = str(text)
     return text if len(text) <= width else text[: width - 3] + "..."
+
+
+def cap_per_company(items: list[dict], max_per_company: int) -> list[dict]:
+    """Keep at most max_per_company entries per company, preserving order.
+
+    Display-only: callers still see the full input count for hidden footers.
+    Company identity is the listing's `company` field, compared case-insensitively.
+    """
+    if max_per_company <= 0:
+        return list(items)
+    counts: dict[str, int] = {}
+    kept = []
+    for l in items:
+        company = str(l.get("company") or "?").strip().lower()
+        if counts.get(company, 0) >= max_per_company:
+            continue
+        counts[company] = counts.get(company, 0) + 1
+        kept.append(l)
+    return kept
 
 
 def merge_highlights(
@@ -49,6 +80,7 @@ def format_digest(
     notes: str = "",
     trending: list[dict] | None = None,
     trending_manual: list[dict] | None = None,
+    max_per_company: int | None = None,
 ) -> str:
     """Format the full run report as markdown.
 
@@ -57,11 +89,15 @@ def format_digest(
     TRENDING COMPANIES (new matches from trending sources) and the MANUAL
     CHECK block render when the run has them. NEW MATCHES (strong first,
     then worth a look) covers the non-trending new listings and appears
-    only when the run found any.
+    only when the run found any. Tier sections show at most
+    max_per_company entries per company (default: criteria.yaml
+    `digest_max_per_company`, fallback 3) plus the overall 10-per-tier cap.
     """
     highlights = highlights or []
     trending = trending or []
     trending_manual = trending_manual or []
+    if max_per_company is None:
+        max_per_company = _default_max_per_company()
 
     lines = []
     lines.append(f"Job Tracker Digest - {datetime.now().strftime('%b %d, %H:%M')}")
@@ -127,10 +163,13 @@ def format_digest(
         parts.append("")
         return parts
 
-    def render_tier_sections(items: list[dict]) -> list[str]:
+    def render_tier_sections(items: list[dict], max_per_company: int) -> list[str]:
         # Display-only truncation (same policy as the highlights block):
         # scoring and dedup keep the full shape, the digest shows the top
-        # matches per tier so the report stays readable/deliverable.
+        # matches per tier so the report stays readable/deliverable. Within
+        # a tier, one company shows at most max_per_company entries (the
+        # highest-scored ones, since items arrive score-sorted) so a single
+        # employer cannot flood the section; the rest count as hidden.
         max_shown = 10
         out = []
         for tier, header in (("strong", "**STRONG MATCH**"), ("worth", "**WORTH A LOOK**")):
@@ -139,9 +178,10 @@ def format_digest(
                 continue
             out.append(header)
             out.append("")
-            for i, l in enumerate(tier_items[:max_shown], 1):
+            shown = cap_per_company(tier_items, max_per_company)
+            for i, l in enumerate(shown[:max_shown], 1):
                 out.extend(format_listing(l, i))
-            hidden = len(tier_items) - max_shown
+            hidden = len(tier_items) - min(len(shown), max_shown)
             if hidden > 0:
                 out.append(f"(+{hidden} more above threshold, not shown)")
                 out.append("")
@@ -150,7 +190,7 @@ def format_digest(
     if trending:
         lines.append("**TRENDING COMPANIES** (Setter30)")
         lines.append("")
-        lines.extend(render_tier_sections(trending))
+        lines.extend(render_tier_sections(trending, max_per_company))
 
     if trending_manual:
         lines.append(
@@ -164,7 +204,7 @@ def format_digest(
     if listings:
         lines.append("**NEW MATCHES**")
         lines.append("")
-        lines.extend(render_tier_sections(listings))
+        lines.extend(render_tier_sections(listings, max_per_company))
     else:
         lines.append(
             "No new non-trending matches this run: everything above threshold was already reported."

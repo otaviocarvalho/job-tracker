@@ -21,6 +21,14 @@ def l(idx, tier, score, source="Test Source"):
     }
 
 
+def c(idx, tier, score, company):
+    """Listing with an explicit company (source stays neutral so assertions
+    can count exactly one occurrence per shown listing)."""
+    item = l(idx, tier, score)
+    item["company"] = company
+    return item
+
+
 def test_trending_section_groups_by_tier_before_new_matches():
     trending = [l(1, "strong", 90, "Anthropic"), l(2, "worth", 50, "Anthropic")]
     other = [l(3, "strong", 80, "HN Who's Hiring")]
@@ -67,3 +75,39 @@ def test_tier_display_capped_with_hidden_footer():
     out = digest.format_digest([], trending=many)
     assert out.count("Databricks") == 10  # max 10 shown per tier (source meta)
     assert "(+5 more above threshold, not shown)" in out
+
+
+def test_per_company_cap_keeps_other_employers_visible():
+    # 5 Anthropic roles would fill a whole 10-slot tier; the cap reserves
+    # room for the other company even when Anthropic out-scores everything.
+    flood = [c(i, "strong", 90 - i, "Anthropic") for i in range(5)]
+    other = [c(50, "strong", 40, "Databricks")]
+    out = digest.format_digest([], trending=flood + other)
+    assert out.count("Anthropic") == 3
+    assert out.count("Databricks") == 1
+    assert "(+2 more above threshold, not shown)" in out
+
+
+def test_per_company_cap_is_per_tier_and_configurable():
+    # Same employer in both tiers: each tier gets its own allowance.
+    items = [c(i, "strong", 90 - i, "Anthropic") for i in range(4)]
+    items += [c(i, "worth", 50 - i, "Anthropic") for i in range(4)]
+    out = digest.format_digest([], trending=items, max_per_company=2)
+    assert out.count("Anthropic") == 4  # 2 strong + 2 worth
+    assert "(+2 more above threshold, not shown)" in out
+
+
+def test_per_company_cap_applies_to_new_matches_section_too():
+    flood = [c(i, "strong", 90 - i, "Anthropic") for i in range(5)]
+    out = digest.format_digest(flood)
+    assert out.count("Anthropic") == 3
+    assert "(+2 more above threshold, not shown)" in out
+
+
+def test_cap_per_company_is_case_insensitive_and_zero_disables():
+    items = [
+        {"company": c, "title": "t", "url": f"u{i}"}
+        for i, c in enumerate(["acme", "Acme", "ACME", "acme ", "Other"])
+    ]
+    assert len(digest.cap_per_company(items, 2)) == 3  # 2x acme + Other
+    assert len(digest.cap_per_company(items, 0)) == 5  # 0 = disabled
