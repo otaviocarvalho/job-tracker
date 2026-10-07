@@ -44,13 +44,18 @@ def cap_per_company(items: list[dict], max_per_company: int) -> list[dict]:
 
 
 def merge_highlights(
-    tracked: list[dict], current: list[dict], limit: int = 10
+    tracked: list[dict],
+    current: list[dict],
+    limit: int = 10,
+    max_per_company: int | None = None,
 ) -> list[dict]:
     """Combine DB-tracked top scores with this run's above-threshold candidates.
 
     `tracked` rows come from seen.top_scores() (they have first_seen);
     `current` listings are this run's scored candidates (labeled "this run").
     Dedup by URL (current wins so a fresh run shows up even if already tracked).
+    The per-company cap (criteria.yaml `digest_max_per_company`, default 3)
+    applies before the overall limit, so one company cannot fill every slot.
     """
     merged: list[dict] = []
     seen_urls: set[str] = set()
@@ -71,7 +76,11 @@ def merge_highlights(
         seen_urls.add(url)
         merged.append(item)
     merged.sort(key=lambda h: h.get("score", 0) or 0, reverse=True)
-    return merged[:limit]
+    capped = cap_per_company(
+        merged,
+        _default_max_per_company() if max_per_company is None else max_per_company,
+    )
+    return capped[:limit]
 
 
 def format_digest(
@@ -89,8 +98,8 @@ def format_digest(
     TRENDING COMPANIES (new matches from trending sources) and the MANUAL
     CHECK block render when the run has them. NEW MATCHES (strong first,
     then worth a look) covers the non-trending new listings and appears
-    only when the run found any. Tier sections show at most
-    max_per_company entries per company (default: criteria.yaml
+    only when the run found any. Tier sections and the 90-day highlights show
+    at most max_per_company entries per company (default: criteria.yaml
     `digest_max_per_company`, fallback 3) plus the overall 10-per-tier cap.
     """
     highlights = highlights or []

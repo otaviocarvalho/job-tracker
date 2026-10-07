@@ -145,5 +145,6 @@ strong_match_threshold: 70
 worth_a_look_threshold: 45
 
 # Digest display (display-only truncation, scoring/dedup keep the full shape):
-# tier sections show at most this many entries per company (highest scores first)
+# NEW MATCHES tier sections and the 90-day highlights show at most this many
+# entries per company (highest scores first)
 digest_max_per_company: 3

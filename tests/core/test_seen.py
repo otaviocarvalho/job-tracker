@@ -98,12 +98,27 @@ def test_top_scores_orders_by_score_and_filters_window():
 
 def test_top_scores_respects_limit():
     for i in range(15):
-        seen.mark_seen(f"https://jobs/{i}", f"T{i}", score=i)
+        seen.mark_seen(f"https://jobs/{i}", f"T{i}", company=f"C{i}", score=i)
 
     top = seen.top_scores(days=90, limit=5)
 
     assert len(top) == 5
     assert top[0]["title"] == "T14"  # highest score first
+
+
+def test_top_scores_caps_per_company():
+    for i in range(5):
+        seen.mark_seen(f"https://jobs/a{i}", f"A{i}", company="Flood", score=100 - i)
+    seen.mark_seen("https://jobs/b", "B", company="Beta", score=95)
+    seen.mark_seen("https://jobs/g", "G", company="Gamma", score=90)
+
+    top = seen.top_scores(days=90, limit=10)
+
+    flood = [t for t in top if t["company"] == "Flood"]
+    assert len(flood) == 3  # cap before the overall limit
+    assert len(top) == 5  # 3 Flood + Beta + Gamma
+    assert top[0]["company"] == "Flood" and top[0]["score"] == 100
+    assert [t["company"] for t in top if t["company"] != "Flood"] == ["Beta", "Gamma"]
 
 
 def test_top_scores_empty_db_returns_empty_list(isolated_db):

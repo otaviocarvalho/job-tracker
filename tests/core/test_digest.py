@@ -116,3 +116,19 @@ def test_merge_highlights_respects_limit():
     merged = digest.merge_highlights(tracked, [], limit=10)
     assert len(merged) == 10
     assert merged[0]["score"] == 100
+
+
+def test_merge_highlights_caps_per_company():
+    flood = [
+        {"title": f"Flood {i}", "company": "Flood", "source": "s", "score": 100 - i,
+         "url": f"https://jobs/f/{i}", "first_seen": "2026-09-01 10:00:00"}
+        for i in range(6)
+    ]
+    others = [h(1, score=95), h(2, score=90), h(3, score=85), h(4, score=80)]
+
+    merged = digest.merge_highlights(flood, others, limit=10)
+
+    assert len(merged) == 7  # 3 Flood + 4 other companies
+    assert len([m for m in merged if m["company"] == "Flood"]) == 3
+    assert merged[0]["company"] == "Flood" and merged[0]["score"] == 100
+    assert [m["score"] for m in merged] == sorted((m["score"] for m in merged), reverse=True)
