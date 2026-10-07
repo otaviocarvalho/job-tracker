@@ -28,6 +28,7 @@ reject_title_keywords:
   - designer
   - data scientist
   - data analyst
+  - architect
 
 # Hard reject: if ALL of these are absent from title, likely not a fit
 # (at least one positive keyword must be present)
@@ -39,7 +40,6 @@ require_any_title_keyword:
   - back-end
   - platform
   - infrastructure
-  - architect
   - lead
   - staff
   - principal
