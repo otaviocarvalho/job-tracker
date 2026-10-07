@@ -88,7 +88,7 @@ That is the whole integration: one new module + one YAML line.
 `pipeline.run()` (invoked by `main.py`):
 
 1. **Scrape** every source from `sources.yaml` (optionally filtered by `--source <name substring>`, case-insensitive) via `registry.scrape_source`. Unknown types print `  Unknown source type: <type>` and contribute nothing. After scraping, `pipeline.filter_by_location` drops listings whose `location` misses every substring in the source's `config.location_include` (no key = untouched; AD-0007).
-2. **Score** with `core.scoring` against `criteria.yaml`: hard rejects (frontend/EM/devops...), require-any title keyword, positive title/tech/domain points, remote +10 / EU +8, capped at 100. Tiers: strong >= 70, worth >= 45; only those survive.
+2. **Score** with `core.scoring` against `criteria.yaml`: hard rejects (frontend/EM/devops..., plus `reject_location_keywords` for Asia/India/APAC — word-boundary match on `location`), require-any title keyword, positive title/tech/domain points, remote +10 / EU +8, capped at 100. Tiers: strong >= 70, worth >= 45; only those survive.
 3. **Dedup** with `core.seen` (SQLite by URL hash; empty URLs hash too).
 4. **Digest** sorted by score desc: TRENDING COMPANIES (sources flagged `config.trending`), the TRENDING MANUAL CHECK block (report-type trending sources), then NEW MATCHES for the rest; each family grouped STRONG MATCH then WORTH A LOOK, capped at 10 shown per tier and at most `digest_max_per_company` (criteria.yaml, default 3) entries per company — display-only truncation, the hidden footer counts everything not shown.
 5. **Mark seen** unless `--dry-run`. `--reset` wipes dedup state first.

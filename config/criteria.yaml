@@ -29,6 +29,90 @@ reject_title_keywords:
   - data scientist
   - data analyst
   - architect
+  - solutions engineer
+  - solution engineer
+
+# Hard reject: if ANY of these appear in the location (word-boundary match,
+# e.g. 'india' does NOT match 'Indianapolis'), auto-reject. Covers Asia /
+# India / APAC (incl. Australia & NZ, which are APAC in business terms).
+reject_location_keywords:
+  # Regions
+  - apac
+  - asia
+  - asia-pacific
+  # India
+  - india
+  - bangalore
+  - bengaluru
+  - mumbai
+  - gurgaon
+  - gurugram
+  - noida
+  - hyderabad
+  - pune
+  - chennai
+  - delhi
+  - kolkata
+  - ahmedabad
+  - jaipur
+  - indore
+  - chandigarh
+  - kochi
+  - coimbatore
+  # East Asia
+  - china
+  - beijing
+  - shanghai
+  - shenzhen
+  - hangzhou
+  - hong kong
+  - taiwan
+  - taipei
+  - japan
+  - tokyo
+  - osaka
+  - korea
+  - seoul
+  - macau
+  # Southeast Asia
+  - singapore
+  - vietnam
+  - ho chi minh
+  - hanoi
+  - indonesia
+  - jakarta
+  - philippines
+  - manila
+  - malaysia
+  - kuala lumpur
+  - thailand
+  - bangkok
+  - cambodia
+  - myanmar
+  # South Asia (rest)
+  - pakistan
+  - karachi
+  - lahore
+  - bangladesh
+  - dhaka
+  - sri lanka
+  - colombo
+  - nepal
+  - kathmandu
+  # Central Asia
+  - kazakhstan
+  - almaty
+  - uzbekistan
+  - tashkent
+  # Oceania (APAC)
+  - australia
+  - sydney
+  - melbourne
+  - brisbane
+  - perth
+  - new zealand
+  - auckland
+  - wellington
 
 # Hard reject: if ALL of these are absent from title, likely not a fit
 # (at least one positive keyword must be present)

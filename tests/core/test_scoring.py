@@ -31,6 +31,15 @@ def test_no_reject_when_engineering_keyword_present():
     assert reason == ""
 
 
+def test_reject_solutions_engineer_title_variants():
+    for title in ["Solutions Engineer", "Solution Engineer", "Lead Solutions Engineer",
+                  "Solutions Engineering Manager"]:
+        rejected, reason = scoring.should_reject(title)
+        assert rejected is True, title
+        assert "engineer" in reason, title
+    assert scoring.should_reject("Senior Software Engineer")[0] is False
+
+
 def test_score_title_and_tech_and_remote_bonus():
     scored = scoring.score_listing(listing(
         title="Senior Platform Engineer",
@@ -92,3 +101,26 @@ def test_filter_and_score_keeps_only_strong_and_worth():
     assert len(kept) == 1
     assert kept[0]["tier"] == "worth"
     assert kept[0]["title"] == "Senior Platform Engineer"
+
+
+def test_location_reject_apac():
+    for location in ["Bengaluru, India", "Singapore", "Remote - APAC", "Tokyo, Japan",
+                     "Sydney, Australia", "Ho Chi Minh City, Vietnam"]:
+        scored = scoring.score_listing(listing(
+            title="Senior Backend Engineer", location=location,
+        ))
+        assert scored["tier"] == "rejected", location
+        assert "in location" in scored["reject_reason"], location
+
+
+def test_location_reject_is_word_boundary():
+    # 'india' must not match Indianapolis (US)
+    scored = scoring.score_listing(listing(
+        title="Senior Backend Engineer", description="Kafka", location="Indianapolis, IN, USA",
+    ))
+    assert scored["tier"] in ("strong", "worth")
+
+    scored = scoring.score_listing(listing(
+        title="Senior Backend Engineer", description="Kafka", location="London, UK",
+    ))
+    assert scored["tier"] in ("strong", "worth")

@@ -1,4 +1,6 @@
 """Score job listings against profile criteria."""
+import re
+
 from .config import load_criteria
 
 _criteria = None
@@ -52,6 +54,16 @@ def score_listing(listing: dict) -> dict:
         return listing
 
     c = _get_criteria()
+
+    # Hard reject: location keywords (word-boundary match so 'india' never
+    # hits 'Indianapolis'; catches Asia / India / APAC locations)
+    for kw in c.get("reject_location_keywords", []):
+        if re.search(rf"\b{re.escape(kw)}\b", location):
+            listing["score"] = 0
+            listing["tier"] = "rejected"
+            listing["reject_reason"] = f"reject keyword '{kw}' in location"
+            return listing
+
     score = 0
     matched = []
 

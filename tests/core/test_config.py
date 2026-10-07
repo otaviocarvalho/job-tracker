@@ -43,3 +43,5 @@ def test_load_criteria_values_used_by_scoring():
     assert c["positive_title_keywords"]["staff"] == 20
     assert "frontend" in c["reject_title_keywords"]
     assert c["digest_max_per_company"] == 3
+    assert "solutions engineer" in c["reject_title_keywords"]
+    assert "india" in c["reject_location_keywords"]
