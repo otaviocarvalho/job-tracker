@@ -4,6 +4,8 @@
 
 PASS — all GRP-01..GRP-08 acceptance criteria covered by named tests, all 5 required adversarial mutations killed, final gate 135/135 green (exit 0), live-config sanity runs clean.
 
+Evidence (file:line): v1 migration preservation `tests/core/test_seen.py:165`; per-group dedup isolation `tests/core/test_seen.py:128`; reset wipes all groups `tests/core/test_seen.py:221`; word-boundary gate `tests/test_pipeline.py:196`; one-scrape×three-groups `tests/test_pipeline.py:229`; `--group` case-insensitivity `tests/test_pipeline.py:342`; digest label line `tests/core/test_trending.py:116`; flag forwarding `tests/test_cli.py:151`; golden cron contract `tests/test_cli.py:24` (GOLDEN_REPORT_ONLY).
+
 ## Gate
 
 - Baseline at HEAD (0623e3b) before Task 1: 107 passed, exit 0.
