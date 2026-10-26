@@ -105,14 +105,17 @@ def test_source_filter_is_case_insensitive_substring(monkeypatch):
 def test_phase_order_scrape_score_dedup_digest_mark(monkeypatch):
     events = []
     monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(
+        pipeline, "load_groups", lambda: [{"name": "g1", "label": "G1"}]
+    )
     monkeypatch.setattr(pipeline, "scrape_source", lambda s: events.append("scrape") or [dict(STRONG)])
     monkeypatch.setattr(pipeline.matcher, "filter_and_score", lambda ls: events.append("score") or ls)
-    monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls: events.append("dedup") or ls)
+    monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls, **kw: events.append("dedup") or ls)
     monkeypatch.setattr(
         pipeline.digest, "format_digest",
-        lambda ls, highlights=None, notes="", trending=None, trending_manual=None: events.append("digest") or "DIGEST",
+        lambda ls, highlights=None, notes="", trending=None, trending_manual=None, group_label="": events.append("digest") or "DIGEST",
     )
-    monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls: events.append("mark"))
+    monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls, group="": events.append("mark"))
 
     pipeline.run()
 
@@ -144,7 +147,7 @@ def test_location_filter_runs_inside_pipeline(monkeypatch):
     # Listings outside the configured geographies never reach scoring,
     # dedup, or the digest.
     src = {
-        "name": "Geo",
+        "name": "S1",
         "type": "t1",
         "url": "u",
         "config": {"location_include": ["remote"]},
@@ -163,14 +166,17 @@ def test_location_filter_runs_inside_pipeline(monkeypatch):
 def test_dry_run_phase_order_skips_mark(monkeypatch):
     events = []
     monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(
+        pipeline, "load_groups", lambda: [{"name": "g1", "label": "G1"}]
+    )
     monkeypatch.setattr(pipeline, "scrape_source", lambda s: events.append("scrape") or [dict(STRONG)])
     monkeypatch.setattr(pipeline.matcher, "filter_and_score", lambda ls: events.append("score") or ls)
-    monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls: events.append("dedup") or ls)
+    monkeypatch.setattr(pipeline.seen, "filter_unseen", lambda ls, **kw: events.append("dedup") or ls)
     monkeypatch.setattr(
         pipeline.digest, "format_digest",
-        lambda ls, highlights=None, notes="", trending=None, trending_manual=None: events.append("digest") or "DIGEST",
+        lambda ls, highlights=None, notes="", trending=None, trending_manual=None, group_label="": events.append("digest") or "DIGEST",
     )
-    monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls: events.append("mark"))
+    monkeypatch.setattr(pipeline.seen, "mark_all_seen", lambda ls, group="": events.append("mark"))
 
     pipeline.run(dry_run=True)
 
@@ -185,3 +191,160 @@ def test_digest_sorted_by_score_desc(monkeypatch):
 
     # strong (70) listed before worth (53) regardless of scrape order
     assert out.index("Staff Platform Engineer") < out.index("Senior Platform Engineer")
+
+
+def test_filter_by_group_word_boundary_gate():
+    group = {"name": "emea", "require_location_keywords": ["uk", "barcelona"]}
+    listings = [
+        dict(STRONG) | {"url": "https://jobs/london", "location": "London, UK"},
+        dict(STRONG) | {"url": "https://jobs/bcn", "location": "Barcelona, Spain"},
+        dict(STRONG) | {"url": "https://jobs/ukraine", "location": "Ukraine Remote"},  # 'uk' inside a word must NOT match
+        dict(STRONG) | {"url": "https://jobs/ny", "location": "New York, NY"},
+        dict(STRONG) | {"url": "https://jobs/empty", "location": ""},
+    ]
+    out = pipeline.filter_by_group(group, listings)
+    assert [l["url"] for l in out] == ["https://jobs/london", "https://jobs/bcn"]
+
+
+def test_filter_by_group_without_keywords_passes_all():
+    group = {"name": "global"}
+    listings = [dict(STRONG), dict(WORTH)]
+    assert pipeline.filter_by_group(group, listings) == listings
+
+
+def test_filter_by_group_prints_drop_summary(capsys):
+    group = {"name": "emea", "require_location_keywords": ["uk"]}
+    pipeline.filter_by_group(group, [dict(STRONG), dict(STRONG) | {"url": "u2", "location": "London, UK"}])
+    captured = capsys.readouterr().out
+    assert "[emea] Group filter: kept 1, dropped 1" in captured
+
+
+BARCELONA = dict(STRONG) | {
+    "title": "Senior Backend Engineer",
+    "url": "https://jobs/bcn",
+    "location": "Barcelona, Spain",
+}  # matches emea + spain-bcn gates, passes global (no gate)
+
+
+def test_barcelona_listing_lands_in_all_three_groups(monkeypatch):
+    """GRP-04/05: one scrape, three labeled groups, per-group dedup state."""
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(BARCELONA)])
+
+    out = pipeline.run()
+
+    assert "**Global**" in out and "**EMEA**" in out and "**Spain Remote + Barcelona**" in out
+    assert out.count("1 above threshold | 1 new") == 3  # one labeled block per group
+    assert seen.is_seen("https://jobs/bcn") is True
+    assert seen.is_seen("https://jobs/bcn", group="emea") is True
+    assert seen.is_seen("https://jobs/bcn", group="spain-bcn") is True
+
+
+def test_global_seen_does_not_block_emea(monkeypatch):
+    """GRP-02: dedup is per group - global reporting never suppresses EMEA."""
+    seen.mark_seen("https://jobs/bcn", "Senior Backend Engineer")  # global only
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(BARCELONA)])
+
+    out = pipeline.run()
+
+    assert "Run: 1 source(s) | 1 raw | 1 above threshold | 0 new" in out  # global deduped
+    assert out.count("1 above threshold | 1 new") == 2  # emea + spain still report it
+    assert seen.is_seen("https://jobs/bcn", group="emea") is True
+
+
+def test_remote_only_listing_is_emea_shy(monkeypatch):
+    """A bare 'Remote' location cannot prove geography -> absent from gated groups."""
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(STRONG)])  # location: Remote
+
+    out = pipeline.run()
+
+    assert "https://jobs/strong" in out  # global (no gate)
+    assert seen.is_seen("https://jobs/strong", group="emea") is False
+
+
+def test_group_gate_dropped_listings_never_burn_dedup(monkeypatch):
+    """Gate-dropped listings are not marked seen for the gating group (AD-0007 lineage)."""
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(STRONG)])
+    pipeline.run()
+    assert seen.is_seen("https://jobs/strong", group="emea") is False
+
+
+def test_group_filter_selects_subset(monkeypatch):
+    """GRP-07: --group picks a subset by case-insensitive substring."""
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(BARCELONA)])
+
+    out = pipeline.run(group_filter="emea")
+
+    assert "**EMEA**" in out
+    assert "**Global**" not in out
+    assert "**Spain Remote + Barcelona**" not in out
+    assert seen.is_seen("https://jobs/bcn") is False  # global untouched
+    assert seen.is_seen("https://jobs/bcn", group="emea") is True
+
+
+def test_group_filter_no_match_returns_empty(monkeypatch, capsys):
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [])
+
+    out = pipeline.run(group_filter="zzz")
+
+    assert out == ""
+    assert "No group matches filter: zzz" in capsys.readouterr().out
+
+
+def test_group_sources_subset_narrows_pool(monkeypatch):
+    """A group with a `sources` list only sees listings from those sources."""
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES)
+    monkeypatch.setattr(
+        pipeline,
+        "load_groups",
+        lambda: [{"name": "subset", "label": "S2 Only", "sources": ["S2"]}],
+    )
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(STRONG)])  # source: S1
+
+    out = pipeline.run()
+
+    assert "**S2 Only**" in out
+    assert "Run: 1 source(s) | 0 raw" in out
+    assert "https://jobs/strong" not in out.split("**S2 Only**", 1)[1]
+    assert seen.is_seen("https://jobs/strong", group="subset") is False
+
+
+def test_trending_manual_block_only_for_flagged_groups(monkeypatch):
+    TR = {
+        "name": "Trendy",
+        "type": "report",
+        "url": "https://trendy",
+        "config": {"trending": True},
+    }
+    monkeypatch.setattr(pipeline, "load_sources", lambda: [TR])
+    monkeypatch.setattr(
+        pipeline,
+        "load_groups",
+        lambda: [
+            {"name": "g1", "label": "With Manual", "trending_manual": True},
+            {"name": "g2", "label": "Without Manual"},
+        ],
+    )
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [])
+
+    out = pipeline.run()
+
+    assert out.count("TRENDING MANUAL CHECK") == 1
+    manual_pos = out.index("TRENDING MANUAL CHECK")
+    assert manual_pos < out.index("**Without Manual**")
+
+
+def test_dry_run_leaves_every_group_unmarked(monkeypatch):
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(BARCELONA)])
+
+    pipeline.run(dry_run=True)
+
+    assert seen.is_seen("https://jobs/bcn") is False
+    assert seen.is_seen("https://jobs/bcn", group="emea") is False
+    assert seen.is_seen("https://jobs/bcn", group="spain-bcn") is False

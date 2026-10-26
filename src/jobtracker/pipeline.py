@@ -1,13 +1,16 @@
-"""Pipeline: orchestrate scrape -> score -> dedup -> digest -> mark seen.
+"""Pipeline: orchestrate scrape -> per-group (gate -> score -> dedup -> digest -> mark).
 
-The run() body is the legacy main.py orchestration, kept verbatim so the
-stdout contract the Hermes cron relies on does not move.
+Scraping happens once per run; every search group (AD-0008) then narrows the
+same raw pool through its own location gate and keeps an independent dedup
+state, so one group seeing a listing never suppresses another group's report.
 """
+import re
+
 import jobtracker.core.digest as digest
 import jobtracker.core.scoring as matcher
 import jobtracker.core.seen as seen
 import jobtracker.feeds  # noqa: F401 - side effect: feed slices self-register on import
-from jobtracker.core.config import load_sources
+from jobtracker.core.config import load_groups, load_sources
 from jobtracker.registry import scrape_source
 
 
@@ -40,7 +43,39 @@ def filter_by_location(source: dict, listings: list[dict]) -> list[dict]:
     return kept
 
 
-def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
+def filter_by_group(group: dict, listings: list[dict]) -> list[dict]:
+    """Group-level location gate: require_location_keywords as word boundaries (AD-0008).
+
+    Matches the group's `require_location_keywords` against the `location`
+    field only (same field the AD-0007 per-source gate reads). Word-boundary
+    matching so `uk` hits "London, UK" but not "Ukraine". A listing with an
+    empty location cannot prove geography and is dropped for gated groups;
+    groups without keywords pass everything through untouched.
+    """
+    keywords = group.get("require_location_keywords") or []
+    if not keywords:
+        return listings
+    pattern = re.compile(
+        r"\b(?:" + "|".join(re.escape(k) for k in keywords) + r")\b"
+    )
+    kept = [
+        l for l in listings if pattern.search(str(l.get("location") or "").lower())
+    ]
+    dropped = len(listings) - len(kept)
+    if dropped:
+        print(
+            f"  [{group['name']}] Group filter: kept {len(kept)}, "
+            f"dropped {dropped} (require-location gate)"
+        )
+    return kept
+
+
+def run(
+    reset: bool = False,
+    source_filter: str = "",
+    dry_run: bool = False,
+    group_filter: str = "",
+):
     if reset:
         print("Clearing dedup database...")
         seen.clear_all()
@@ -49,7 +84,16 @@ def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
     if source_filter:
         sources = [s for s in sources if source_filter.lower() in s["name"].lower()]
 
-    # Phase 1: Scrape all sources
+    groups = load_groups()
+    if group_filter:
+        groups = [
+            g for g in groups if group_filter.lower() in g["name"].lower()
+        ]
+        if not groups:
+            print(f"No group matches filter: {group_filter}")
+            return ""
+
+    # Phase 1: Scrape all sources once; groups fan out over the same pool
     print(f"\n{'='*60}")
     print(f"Scraping {len(sources)} source(s)...")
     print(f"{'='*60}")
@@ -66,72 +110,87 @@ def run(reset: bool = False, source_filter: str = "", dry_run: bool = False):
 
     if not all_listings:
         print("No listings found. Done.")
-        scored = []
-    else:
-        # Phase 2: Filter and score
-        print(f"\n{'='*60}")
-        print("Scoring and filtering...")
-        print(f"{'='*60}")
 
-        scored = matcher.filter_and_score(all_listings)
-        print(f"After scoring: {len(scored)} listings above threshold")
+    # Phases 2-4 per group: gate -> score -> dedup -> digest block.
+    # Each group keeps its own dedup state, so the same listing can be new
+    # in EMEA while already reported globally (AD-0008).
+    blocks = []
+    to_mark = []  # (group_name, new_listings)
+    for group in groups:
+        name = group["name"]
+        src_names = (
+            set(group["sources"])
+            if group.get("sources")
+            else {s["name"] for s in sources}
+        )
+        group_sources = [s for s in sources if s["name"] in src_names]
+        raw = [l for l in all_listings if l.get("source") in src_names]
+        raw = filter_by_group(group, raw)
 
-        if not scored:
-            print("No listings above threshold. Done.")
+        scored = matcher.filter_and_score(raw) if raw else []
+        new_listings = seen.filter_unseen(scored, group=name)
+        if new_listings:
+            new_listings.sort(key=lambda l: l.get("score", 0), reverse=True)
+        print(f"  [{name}] {len(scored)} above threshold | {len(new_listings)} new")
+        if not new_listings:
+            print(f"  [{name}] No new listings. Done.")
 
-    # Phase 3: Dedup
-    print(f"\n{'='*60}")
-    print("Deduplicating...")
-    print(f"{'='*60}")
+        # Sources flagged config.trending (Setter30 boards) get their own
+        # digest section; report-type trending sources become the MANUAL
+        # CHECK block, rendered only for groups that ask for it.
+        trending_names = {
+            s["name"]
+            for s in group_sources
+            if (s.get("config") or {}).get("trending")
+        }
+        trending_new = [l for l in new_listings if l.get("source") in trending_names]
+        other_new = [
+            l for l in new_listings if l.get("source") not in trending_names
+        ]
+        trending_manual = (
+            [
+                {"name": s["name"], "url": s.get("url", "")}
+                for s in group_sources
+                if s.get("type") == "report" and (s.get("config") or {}).get("trending")
+            ]
+            if group.get("trending_manual")
+            else []
+        )
 
-    new_listings = seen.filter_unseen(scored)
-    print(f"After dedup: {len(new_listings)} new listings")
+        highlights = digest.merge_highlights(
+            seen.top_scores(days=90, limit=10, group=name), scored
+        )
+        notes = (
+            f"Run: {len(group_sources)} source(s) | {len(raw)} raw | "
+            f"{len(scored)} above threshold | {len(new_listings)} new"
+        )
+        blocks.append(
+            digest.format_digest(
+                other_new,
+                highlights=highlights,
+                notes=notes,
+                trending=trending_new,
+                trending_manual=trending_manual,
+                group_label=group["label"],
+            )
+        )
+        to_mark.append((name, new_listings))
 
-    if not new_listings:
-        print("No new listings. Done.")
-    else:
-        # Sort by score descending
-        new_listings.sort(key=lambda l: l.get("score", 0), reverse=True)
-
-    # Phase 4: Output - the report always carries execution notes and the
-    # 90-day top-scores highlight, even on a run with zero new matches.
-    # Sources flagged config.trending (Setter30 boards) get their own digest
-    # section; report-type trending sources become the MANUAL CHECK block.
-    trending_names = {
-        s["name"]
-        for s in sources
-        if (s.get("config") or {}).get("trending")
-    }
-    trending_new = [l for l in new_listings if l.get("source") in trending_names]
-    other_new = [l for l in new_listings if l.get("source") not in trending_names]
-    trending_manual = [
-        {"name": s["name"], "url": s.get("url", "")}
-        for s in sources
-        if s.get("type") == "report" and (s.get("config") or {}).get("trending")
-    ]
-
-    highlights = digest.merge_highlights(seen.top_scores(days=90, limit=10), scored)
-    notes = (
-        f"Run: {len(sources)} source(s) | {len(all_listings)} raw | "
-        f"{len(scored)} above threshold | {len(new_listings)} new"
-    )
-
+    # Phase 4: Output - one DIGEST header, one labeled block per group. The
+    # report always carries execution notes and the 90-day top-scores
+    # highlight per group, even on a run with zero new matches.
     print(f"\n{'='*60}")
     print("DIGEST")
     print(f"{'='*60}\n")
 
-    output = digest.format_digest(
-        other_new,
-        highlights=highlights,
-        notes=notes,
-        trending=trending_new,
-        trending_manual=trending_manual,
-    )
+    output = "\n\n".join(blocks)
     print(output)
 
-    # Mark as seen (unless dry run)
-    if not dry_run and new_listings:
-        seen.mark_all_seen(new_listings)
-        print(f"\nMarked {len(new_listings)} listings as seen.")
+    # Mark as seen, per group (unless dry run)
+    if not dry_run:
+        for name, new_listings in to_mark:
+            if new_listings:
+                seen.mark_all_seen(new_listings, group=name)
+                print(f"\nMarked {len(new_listings)} listings as seen ({name}).")
 
     return output

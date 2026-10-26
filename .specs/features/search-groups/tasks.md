@@ -52,6 +52,8 @@ fresh DB has composite PK; rerun of migration on v2 is a no-op.
 
 ### T3: Digest group block
 
+**Status**: done
+
 `digest.format_digest` gains `group_label: str = ""`; when set, prints
 `**<label>**` between the title line and notes (GRP-06). No other rendering
 change; default call sites stay byte-identical.
@@ -66,6 +68,8 @@ label line; without label, output identical to today.
 ### Phase 2
 
 ### T4: Pipeline multi-group run
+
+**Status**: done
 
 `pipeline.run` gains `group_filter: str = ""`: loads groups (substring filter,
 case-insensitive; no match -> print `No group matches filter: <f>` and return
