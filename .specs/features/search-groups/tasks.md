@@ -29,6 +29,8 @@ keyword lowering + label defaulting.
 
 ### T2: Group-scoped dedup store + v1->v2 migration
 
+**Status**: done
+
 `src/jobtracker/core/seen.py`: table v2 = columns `(url_hash, group_name NOT
 NULL DEFAULT 'global', url, title, company, source, score, first_seen,
 PRIMARY KEY (url_hash, group_name))`; `_connect()` creates v2 on fresh DBs and
