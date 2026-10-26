@@ -36,8 +36,12 @@ Three related changes from Otavio's watchlist feedback ("too many Anthropic posi
 
 Cron stdout contract untouched: same DIGEST shape, footer wording unchanged, goldens (report-only path) byte-identical without regeneration.
 
+### AD-0008: Search groups - parallel trackers over the same feeds (active, 2026-10-26)
+
+Otavio asked for an EMEA-only tracker and a Spain remote + Barcelona tracker in parallel to the existing global one. Design: `config/groups.yaml` defines named groups; each group = `label` + optional `require_location_keywords` (word-boundary gate on `location`, `pipeline.filter_by_group`; empty location = dropped for gated groups) + optional `sources` subset + optional `trending_manual` flag (only `global` renders the MANUAL CHECK block - triplicate spam otherwise). The pipeline scrapes every source ONCE per run and fans the raw pool out to all groups; each group scores, dedups and digests independently. `core.seen` schema v2: primary key `(url_hash, group_name)` - the same listing can be new in `emea` while already reported in `global`; v1 databases migrate in place on first connection (every existing row moves under `global`, `first_seen` preserved, transactional rename-copy-drop). `--group <substring>` (cli, forwarded to `pipeline.run(group_filter=...)`) runs a subset; plain `main.py` runs all groups in one output (one DIGEST header, labeled `**<label>**` blocks). Deployed wiring: one Hermes cron per group (`--group global` on the existing job `e61ce479c5ee`, new jobs for `--group emea` and `--group spain-bcn`, same 6h cadence, same delivery thread) - separate jobs keep each digest under the Telegram 4096-char limit and give each group an independent dedup space. Goldens regenerated for the 3-group no-listing shape; first `emea`/`spain-bcn` run backfills (everything gate-passing is new for the fresh group), afterwards quiet. Keyword lists live in `config/groups.yaml` and are meant to be tuned there, not in code.
+
 ## Handoff Snapshot
 
-- **Feature**: vertical-slicing delivered, verified, and merged to master (b8af9a9); AGENTS.md added (657ce49); cron migrated to the in-project venv per AD-0005 (dc293a4+)
-- **Cron**: job `e61ce479c5ee` now runs `cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null`; `.venv` (Python 3.11) created via `poetry install`; golden byte-match and 76 tests green under `.venv/bin/python`
-- **Next step**: none pending; if the cron ever fails with a missing interpreter, run `poetry install` in the repo root
+- **Feature**: search-groups (AD-0008) delivered and verified: 3 shipped groups (`global`, `emea`, `spain-bcn`), group-scoped dedup with v1->v2 migration, `--group` flag, goldens regenerated (132 tests green)
+- **Cron**: one Hermes job per group - `e61ce479c5ee` (global) plus `Job Tracker EMEA` and `Job Tracker Spain` running `main.py --group <name>` every 6h; each greps the DIGEST header and relays to the job-listings thread
+- **Next step**: none pending; tune group location keywords in `config/groups.yaml` (not in code); if the cron ever fails with a missing interpreter, run `poetry install` in the repo root

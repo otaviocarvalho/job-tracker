@@ -114,6 +114,8 @@ DIGEST.
 
 ### T6: Spec decision log + STATE
 
+**Status**: done
+
 Record AD-0008 (search groups: config shape, per-group dedup, migration
 policy, cron-per-group wiring) in `.specs/STATE.md` decisions and refresh its
 handoff snapshot; final spec traceability status pass.

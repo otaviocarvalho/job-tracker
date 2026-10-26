@@ -13,6 +13,7 @@ poetry run python main.py             # full cycle
 poetry run python main.py --dry-run   # don't mark seen
 poetry run python main.py --reset     # clear dedup DB
 poetry run python main.py --source HN # only HN source
+poetry run python main.py --group emea # only the EMEA search group
 poetry run pytest                     # unit tests
 ```
 
@@ -65,6 +66,14 @@ Removed 2026-08-30: Sequoia, Index Ventures, Greylock Greenhouse boards (all 404
 
 **Per-source location filter** (AD-0007, added 2026-10-06): a source entry may set `config.location_include` (list of substrings); the pipeline then keeps only listings whose `location` field matches at least one substring, case-insensitively, before scoring/dedup. Used for xAI (`london`, `united kingdom`, `ireland`, `dublin`, `emea`, `europe`, `remote international`) so its 300-job board contributes only the geographies Otavio actually wants.
 
+**Search groups** (AD-0008, added 2026-10-26): `config/groups.yaml` defines parallel trackers over the same feeds. Each run scrapes every source once and fans the pool out to all groups; every group has its own location gate (`require_location_keywords`, word-boundary match on the location field) and its own dedup state, so a listing can be new in `emea` while already reported in `global`. Shipped groups:
+
+- `global` — no gate, everything the profile likes (the original tracker), and the only group that renders the TRENDING MANUAL CHECK block
+- `emea` — listings whose location proves EMEA (Europe/Middle East/Africa keyword list; a bare `Remote` without geography is excluded on purpose)
+- `spain-bcn` — Spain remote + Barcelona (`spain` / `barcelona` / `españa`; Madrid-based roles appear too — location strings don't carry remote-ness; tighten the yaml if unwanted)
+
+Run one group with `python main.py --group <name>`; plain `main.py` runs all groups in one output. First runs of a fresh group backfill (everything gate-passing is new), afterwards only genuinely new listings appear. Tune keywords in the yaml, not in code.
+
 Manual-check sources (`type: report`) are listed for reference only; they are not scraped automatically.
 
 ## Adding the Scheduled Job to Hermes
@@ -86,15 +95,21 @@ fails or prints no DIGEST section. Do NOT send debug output or scraping logs.
 
 ### Option B: CLI slash command (exact, as currently deployed)
 
+One cron job per search group (AD-0008), all with the same shape - swap the `--group` value:
+
 ```
-/cron add "0 */6 * * *" "Run the job tracker and deliver the report.
+/cron add "0 */6 * * *" "Run the job tracker (global group) and deliver the report.
 
-Execute: \`cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null\`
+Execute: \`cd ~/code/job-tracker && .venv/bin/python main.py --group global 2>/dev/null\`
 
-Send everything from the \"DIGEST\" header onward, as-is: the report always includes the execution notes line and the top-scores highlight of the last 90 days; a NEW MATCHES section appears only when there are new listings.
+Send everything from the \"DIGEST\" header onward, as-is: the report always includes
+the execution notes line and the top-scores highlight of the last 90 days; a NEW
+MATCHES section appears only when there are new listings.
 If the command fails or prints no DIGEST section, respond with exactly \"[SILENT]\".
 Do NOT send debug output or scraping logs."
 ```
+
+Live jobs: `--group global` (original), `--group emea` (EMEA only), `--group spain-bcn` (Spain remote + Barcelona).
 
 Notes:
 
@@ -103,11 +118,13 @@ Notes:
 - `deliver: origin` sends the digest back to the chat/thread that created the job; use `deliver: telegram` for the home channel.
 - Restrict toolsets with `enabled_toolsets: [terminal]` (as the live job does) to keep the cron run minimal.
 
-### Current live job
+### Current live jobs
 
-- **Job ID:** `e61ce479c5ee` (name: "Job Tracker")
-- **Schedule:** every 360 minutes (6h) — change with `/cron update e61ce479c5ee` or ask Hermes conversationally
-- **Delivery:** origin (Hermes & Renato group, job listings thread)
+One job per search group (AD-0008), all every 6h and delivered to the job-listings thread:
+
+- **Job Tracker** (`e61ce479c5ee`): `--group global`
+- **Job Tracker EMEA**: `--group emea`
+- **Job Tracker Spain**: `--group spain-bcn`
 - **Manage:** `/cron list`, `/cron pause <id>`, `/cron remove <id>` or `hermes cron list` from the shell
 
 ## Architecture

@@ -4,7 +4,7 @@ The architecture doc of record for this repo. It replaces the Architecture secti
 
 ## What it is
 
-A standalone CLI that scrapes curated job feeds, scores listings against Otavio's profile, dedups via SQLite, and prints a markdown digest to stdout. A Hermes cron (`e61ce479c5ee`, every 6h) runs it and relays the digest to Telegram. Code and scheduling are decoupled: the tracker knows nothing about Hermes; Hermes knows nothing about scraping.
+A standalone CLI that scrapes curated job feeds, scores listings against Otavio's profile, dedups via SQLite, and prints a markdown digest to stdout. The tracker supports parallel **search groups** (AD-0008): each group is an independent tracker over the same feeds with its own location gate and its own dedup state — currently `global`, `emea`, and `spain-bcn` (Spain remote + Barcelona). Each Hermes cron job runs one group (`main.py --group <name>`) and relays that group's digest to Telegram; the tracker knows nothing about Hermes; Hermes knows nothing about scraping.
 
 ```
 main.py -> cli -> pipeline -> registry -> feeds/* -> core/*
@@ -28,17 +28,18 @@ job-tracker/
 ├── main.py                    # thin shim: src/ bootstrap + cli.main()  [CRON ENTRYPOINT]
 ├── config/
 │   ├── sources.yaml           # feed registry input: name / type / url / config
-│   └── criteria.yaml          # profile weights, reject rules, thresholds
+│   ├── criteria.yaml          # profile weights, reject rules, thresholds
+│   └── groups.yaml            # search groups (AD-0008): name / label / require_location_keywords
 ├── data/
-│   └── seen.db                # SQLite dedup state (gitignored)
+│   └── seen.db                # SQLite dedup state, keyed (url_hash, group_name) (gitignored)
 └── src/jobtracker/
-    ├── cli.py                 # argparse: --reset / --source / --dry-run
-    ├── pipeline.py            # orchestration: scrape -> score -> dedup -> digest -> mark seen
+    ├── cli.py                 # argparse: --reset / --source / --group / --dry-run
+    ├── pipeline.py            # scrape once -> per-group: gate -> score -> dedup -> digest -> mark
     ├── registry.py            # @register(type) + type -> scrape fn map + scrape_source()
     ├── core/                  # shared kernel (no feed knowledge)
-    │   ├── config.py          # repo_root(), load_sources(), load_criteria()
+    │   ├── config.py          # repo_root(), load_sources(), load_criteria(), load_groups()
     │   ├── scoring.py         # keyword scoring, hard rejects, tiers (strong 70 / worth 45)
-    │   ├── seen.py            # SQLite dedup; JOBTRACKER_DATA_DIR overrides the data dir
+    │   ├── seen.py            # SQLite dedup per search group; JOBTRACKER_DATA_DIR overrides the data dir
     │   └── digest.py          # markdown digest renderer
     └── feeds/                 # VERTICAL SLICES: one self-contained module per feed type
         ├── __init__.py        # pkgutil auto-discovery: imports every module below
@@ -87,24 +88,25 @@ That is the whole integration: one new module + one YAML line.
 
 `pipeline.run()` (invoked by `main.py`):
 
-1. **Scrape** every source from `sources.yaml` (optionally filtered by `--source <name substring>`, case-insensitive) via `registry.scrape_source`. Unknown types print `  Unknown source type: <type>` and contribute nothing. After scraping, `pipeline.filter_by_location` drops listings whose `location` misses every substring in the source's `config.location_include` (no key = untouched; AD-0007).
-2. **Score** with `core.scoring` against `criteria.yaml`: hard rejects (frontend/EM/devops..., plus `reject_location_keywords` for Asia/India/APAC — word-boundary match on `location`), require-any title keyword, positive title/tech/domain points, remote +10 / EU +8, capped at 100. Tiers: strong >= 70, worth >= 45; only those survive.
-3. **Dedup** with `core.seen` (SQLite by URL hash; empty URLs hash too).
-4. **Digest** sorted by score desc: TRENDING COMPANIES (sources flagged `config.trending`), the TRENDING MANUAL CHECK block (report-type trending sources), then NEW MATCHES for the rest; each family grouped STRONG MATCH then WORTH A LOOK, capped at 10 shown per tier and at most `digest_max_per_company` (criteria.yaml, default 3) entries per company — display-only truncation, the hidden footer counts everything not shown.
-5. **Mark seen** unless `--dry-run`. `--reset` wipes dedup state first.
+1. **Scrape** every source from `sources.yaml` ONCE (optionally filtered by `--source <name substring>`, case-insensitive) via `registry.scrape_source`. Unknown types print `  Unknown source type: <type>` and contribute nothing. After scraping, `pipeline.filter_by_location` drops listings whose `location` misses every substring in the source's `config.location_include` (no key = untouched; AD-0007).
+2. **Group fan-out** — the same raw pool feeds every search group from `config/groups.yaml` (AD-0008), each with: a `label` rendered in the digest, optional `require_location_keywords` (word-boundary match on `location` via `pipeline.filter_by_group`; an empty location cannot prove geography and is dropped for gated groups; gate-dropped listings never burn dedup state), and an optional `sources` subset (default: all). `--group <name substring>` (case-insensitive) runs a subset; the default runs all groups.
+3. **Score** each group's pool with `core.scoring` against `criteria.yaml`: hard rejects (frontend/EM/devops..., plus `reject_location_keywords` for Asia/India/APAC — word-boundary match on `location`), require-any title keyword, positive title/tech/domain points, remote +10 / EU +8, capped at 100. Tiers: strong >= 70, worth >= 45; only those survive.
+4. **Dedup** per group with `core.seen` (SQLite keyed `(url_hash, group_name)`; empty URLs hash too) — the same listing can be new in one group and already reported in another.
+5. **Digest** one labeled block per group (`**<label>**` under the title), each sorted by score desc: per-group notes line, the group's TRENDING COMPANIES, the TRENDING MANUAL CHECK block only for groups flagged `trending_manual` (currently `global`), then NEW MATCHES; each family grouped STRONG MATCH then WORTH A LOOK, capped at 10 shown per tier and at most `digest_max_per_company` (criteria.yaml, default 3) entries per company — display-only truncation, the hidden footer counts everything not shown. The report's `highlights` (90-day top scores) are per group too.
+6. **Mark seen** per group unless `--dry-run`. `--reset` wipes dedup state across ALL groups.
 
 ## The cron contract (do not break)
 
-The Hermes job runs `cd ~/code/job-tracker && .venv/bin/python main.py 2>/dev/null` and greps stdout for the digest section. Therefore:
+The Hermes jobs run `cd ~/code/job-tracker && .venv/bin/python main.py --group <name> 2>/dev/null` (one job per group; plain `main.py` = all groups in one output) and grep stdout for the digest section. Therefore:
 
 - `main.py` stays at the repo root and bootstraps `src/` onto `sys.path` itself.
 - The interpreter is the repo's poetry-managed venv: `poetry.toml` (committed) pins `virtualenvs.in-project = true`, so `poetry install` creates/syncs `.venv` with PyYAML locked by `poetry.lock`. If `.venv` is missing or stale, `poetry install` recreates it; a cron failure with a missing interpreter means "run poetry install".
-- Stdout always ends in the DIGEST report: execution notes + the 90-day top-scores highlight on top, then (when present) TRENDING COMPANIES + TRENDING MANUAL CHECK, then NEW MATCHES only when the run found new listings. A plain no-trending, no-listings run renders the original wording byte-identically (that is what the goldens capture). `tests/test_cli.py` byte-matches golden captures of `--source ramp --dry-run` (deterministic: report feed, no network, no dedup writes; only the wall-clock timestamp in the digest header is masked). If you intentionally change output wording, regenerate the goldens and update the cron prompt in the same change.
+- Stdout always ends in the DIGEST report: one labeled block per selected group, each with execution notes + that group's 90-day top-scores highlight on top, then (when present) TRENDING COMPANIES + TRENDING MANUAL CHECK, then NEW MATCHES only when the run found new listings for that group. A plain no-trending, no-listings run renders deterministic wording for all three groups (that is what the goldens capture). `tests/test_cli.py` byte-matches golden captures of `--source ramp --dry-run` (deterministic: report feed, no network, no dedup writes; only the wall-clock timestamp in the digest header is masked). If you intentionally change output wording, regenerate the goldens and update the cron prompt in the same change.
 - Fallback: `main.py` still runs with the system python because runtime deps are stdlib + PyYAML (present for the system interpreter). The venv is the supported path (AD-0005 supersedes AD-0002's interpreter clause).
 
 ## Testing
 
-- `poetry install` once, then `poetry run pytest` (94 tests).
+- `poetry install` once, then `poetry run pytest` (132 tests).
 - The suite never touches the network: every feed test mocks `urllib.request.urlopen` or tests pure parse helpers.
 - The suite never touches the production `data/seen.db`: set `JOBTRACKER_DATA_DIR` (all store/pipeline tests do; it overrides the data directory at call time).
 - Golden CLI tests double as the cron-contract gate; run the full check with `.venv/bin/python main.py --source ramp --dry-run` and compare against the embedded golden in `tests/test_cli.py`.
