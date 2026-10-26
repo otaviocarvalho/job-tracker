@@ -45,3 +45,56 @@ def test_load_criteria_values_used_by_scoring():
     assert c["digest_max_per_company"] == 3
     assert "solutions engineer" in c["reject_title_keywords"]
     assert "india" in c["reject_location_keywords"]
+
+
+def test_load_groups_shipped_yaml():
+    """GRP-08: three production groups ship in order with their gates."""
+    groups = config.load_groups()
+    assert [g["name"] for g in groups] == ["global", "emea", "spain-bcn"]
+    assert [g["label"] for g in groups] == [
+        "Global",
+        "EMEA",
+        "Spain Remote + Barcelona",
+    ]
+    assert groups[0]["require_location_keywords"] == []
+    assert groups[0]["trending_manual"] is True
+    emea = groups[1]["require_location_keywords"]
+    assert "emea" in emea and "europe" in emea and "barcelona" in emea
+    assert "uk" in emea and "united kingdom" in emea
+    spain = groups[2]["require_location_keywords"]
+    assert "spain" in spain and "barcelona" in spain and "españa" in spain
+    assert all(g["sources"] is None for g in groups)
+
+
+def test_load_groups_missing_file_fallback(tmp_path, monkeypatch):
+    """GRP-01: no groups.yaml -> single global group."""
+    monkeypatch.setattr(config, "CONFIG_DIR", tmp_path)
+    assert config.load_groups() == [{"name": "global", "label": "Global"}]
+
+
+def test_load_groups_normalization(tmp_path, monkeypatch):
+    """GRP-01: lowering, label default, sources subset, trending flag."""
+    monkeypatch.setattr(config, "CONFIG_DIR", tmp_path)
+    (tmp_path / "groups.yaml").write_text(
+        "groups:\n"
+        "  - name: eu-only\n"
+        "    require_location_keywords: [Europe, EMEA]\n"
+        "    sources: [HN Who's Hiring, YC Companies]\n"
+        "  - name: tagged\n"
+        "    label: Tagged\n"
+        "    trending_manual: true\n"
+    )
+    groups = config.load_groups()
+    assert groups[0]["label"] == "eu-only"  # label defaults to name
+    assert groups[0]["require_location_keywords"] == ["europe", "emea"]
+    assert groups[0]["sources"] == ["HN Who's Hiring", "YC Companies"]
+    assert groups[0]["trending_manual"] is False
+    assert groups[1]["label"] == "Tagged"
+    assert groups[1]["sources"] is None
+    assert groups[1]["trending_manual"] is True
+
+
+def test_load_groups_empty_yaml_falls_back(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "CONFIG_DIR", tmp_path)
+    (tmp_path / "groups.yaml").write_text("groups: []\n")
+    assert config.load_groups() == [{"name": "global", "label": "Global"}]

@@ -1,0 +1,311 @@
+# Search groups (AD-0008): parallel trackers over the same feeds.
+#
+# Each group = one dedup space + one digest block per run. The Hermes cron
+# runs one group per job (`main.py --group <name>`), so each lands as its own
+# Telegram digest.
+#
+# Keys:
+#   name:                      group id, used by `--group <name>` and the dedup store
+#   label:                     display label in the digest block
+#   require_location_keywords: word-boundary gate on the `location` field only;
+#                              a listing with no location is dropped for the group
+#                              (it cannot prove geography). Empty/absent = pass all.
+#   sources:                   optional subset of source names; absent = all sources
+#   trending_manual:           render the TRENDING MANUAL CHECK block (default false)
+#
+# Adding a group is YAML-only: append an entry, wire a cron, done (no code).
+groups:
+  - name: global
+    label: Global
+    trending_manual: true
+
+  - name: emea
+    label: EMEA
+    require_location_keywords:
+      # Regions
+      - emea
+      - europe
+      - eu
+      - middle east
+      - africa
+      # UK & Ireland
+      - uk
+      - united kingdom
+      - great britain
+      - england
+      - scotland
+      - wales
+      - northern ireland
+      - ireland
+      - dublin
+      - cork
+      - london
+      - manchester
+      - birmingham
+      - leeds
+      - glasgow
+      - edinburgh
+      - bristol
+      - oxford
+      # Iberia
+      - spain
+      - espana
+      - españa
+      - barcelona
+      - madrid
+      - malaga
+      - valencia
+      - seville
+      - bilbao
+      - zaragoza
+      - portugal
+      - lisbon
+      - lisboa
+      - porto
+      - madeira
+      # France & Benelux
+      - france
+      - paris
+      - lyon
+      - toulouse
+      - nantes
+      - marseille
+      - belgium
+      - belgique
+      - brussels
+      - bruxelles
+      - antwerp
+      - leuven
+      - netherlands
+      - holland
+      - amsterdam
+      - rotterdam
+      - utrecht
+      - eindhoven
+      - groningen
+      - luxembourg
+      - monaco
+      # DACH
+      - germany
+      - deutschland
+      - berlin
+      - munich
+      - münchen
+      - hamburg
+      - frankfurt
+      - cologne
+      - köln
+      - stuttgart
+      - düsseldorf
+      - dusseldorf
+      - dresden
+      - leipzig
+      - nuremberg
+      - austria
+      - österreich
+      - vienna
+      - wien
+      - graz
+      - switzerland
+      - schweiz
+      - suisse
+      - zurich
+      - zürich
+      - geneva
+      - genève
+      - basel
+      - lausanne
+      - bern
+      - zug
+      # Nordics & Baltics
+      - denmark
+      - danmark
+      - copenhagen
+      - københavn
+      - aarhus
+      - århus
+      - sweden
+      - sverige
+      - stockholm
+      - gothenburg
+      - göteborg
+      - malmö
+      - malmo
+      - norway
+      - norge
+      - oslo
+      - bergen
+      - finland
+      - suomi
+      - helsinki
+      - espoo
+      - tampere
+      - iceland
+      - reykjavik
+      - estonia
+      - tallinn
+      - tartu
+      - latvia
+      - riga
+      - lithuania
+      - vilnius
+      - kaunas
+      # Central & Eastern Europe
+      - poland
+      - polska
+      - warsaw
+      - warszawa
+      - krakow
+      - kraków
+      - krakau
+      - wroclaw
+      - wrocław
+      - gdansk
+      - gdańsk
+      - poznan
+      - poznań
+      - katowice
+      - czech republic
+      - czechia
+      - prague
+      - praha
+      - brno
+      - slovakia
+      - bratislava
+      - slovenia
+      - ljubljana
+      - hungary
+      - budapest
+      - romania
+      - bucharest
+      - bucuresti
+      - cluj
+      - timisoara
+      - iasi
+      - bulgaria
+      - sofia
+      - plovdiv
+      - greece
+      - athens
+      - thessaloniki
+      - croatia
+      - zagreb
+      - split
+      - serbia
+      - belgrade
+      - novi sad
+      - bosnia
+      - sarajevo
+      - montenegro
+      - podgorica
+      - albania
+      - tirana
+      - kosovo
+      - pristina
+      - north macedonia
+      - macedonia
+      - skopje
+      - moldova
+      - chisinau
+      - ukraine
+      - kyiv
+      - kiev
+      - tbilisi
+      - armenia
+      - yerevan
+      - azerbaijan
+      - baku
+      - cyprus
+      - nicosia
+      - limassol
+      - malta
+      - valletta
+      - gibraltar
+      - turkey
+      - türkiye
+      - turkiye
+      - istanbul
+      - ankara
+      - izmir
+      # Middle East
+      - uae
+      - united arab emirates
+      - dubai
+      - abu dhabi
+      - sharjah
+      - saudi arabia
+      - riyadh
+      - jeddah
+      - qatar
+      - doha
+      - kuwait
+      - bahrain
+      - oman
+      - muscat
+      - jordan
+      - amman
+      - lebanon
+      - beirut
+      - israel
+      - tel aviv
+      - jerusalem
+      - haifa
+      - herzliya
+      - palestine
+      - west bank
+      - iraq
+      - baghdad
+      - iran
+      - tehran
+      # Africa
+      - egypt
+      - cairo
+      - alexandria
+      - morocco
+      - casablanca
+      - rabat
+      - marrakesh
+      - tunisia
+      - tunis
+      - algeria
+      - algiers
+      - libya
+      - tripoli
+      - south africa
+      - cape town
+      - johannesburg
+      - joburg
+      - pretoria
+      - durban
+      - nigeria
+      - lagos
+      - abuja
+      - kenya
+      - nairobi
+      - ghana
+      - accra
+      - ethiopia
+      - addis ababa
+      - uganda
+      - kampala
+      - tanzania
+      - dar es salaam
+      - rwanda
+      - kigali
+      - senegal
+      - dakar
+      - ivory coast
+      - "cote d'ivoire"
+      - abidjan
+      - cameroon
+      - douala
+      - mauritius
+      - port louis
+
+  - name: spain-bcn
+    label: Spain Remote + Barcelona
+    require_location_keywords:
+      - spain
+      - espana
+      - españa
+      - barcelona
