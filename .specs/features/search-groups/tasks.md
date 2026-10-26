@@ -95,6 +95,8 @@ per-group trending_manual.
 
 ### T5: CLI flag + goldens
 
+**Status**: done
+
 `cli.py` adds `--group` (default "") forwarded to `run`. Regenerate the
 golden constants in `tests/test_cli.py` (plain report-only path now renders
 three labeled group blocks; MANUAL CHECK only under Global) and update
