@@ -111,3 +111,19 @@ def test_cap_per_company_is_case_insensitive_and_zero_disables():
     ]
     assert len(digest.cap_per_company(items, 2)) == 3  # 2x acme + Other
     assert len(digest.cap_per_company(items, 0)) == 5  # 0 = disabled
+
+
+def test_group_label_renders_under_title():
+    """GRP-06: labeled group blocks open with a **<label>** line."""
+    out = digest.format_digest([], notes="Run: 1 source(s) | 0 raw", group_label="EMEA")
+    lines = [l for l in out.splitlines() if l.strip()]
+    assert lines[0].startswith("Job Tracker Digest - ")
+    assert lines[1] == "**EMEA**"
+    assert lines[2] == "Run: 1 source(s) | 0 raw"
+
+
+def test_no_group_label_keeps_legacy_shape():
+    """Default call sites (no group_label) render no label line."""
+    out = digest.format_digest([], notes="Run: 1 source(s) | 0 raw")
+    assert "**" not in out.splitlines()[0]
+    assert out.splitlines()[1] == "Run: 1 source(s) | 0 raw"

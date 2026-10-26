@@ -90,17 +90,20 @@ def format_digest(
     trending: list[dict] | None = None,
     trending_manual: list[dict] | None = None,
     max_per_company: int | None = None,
+    group_label: str = "",
 ) -> str:
     """Format the full run report as markdown.
 
     Always contains the execution-notes line and the highlights block
     (top scores of the last 90 days), even when there are no new matches.
-    TRENDING COMPANIES (new matches from trending sources) and the MANUAL
-    CHECK block render when the run has them. NEW MATCHES (strong first,
-    then worth a look) covers the non-trending new listings and appears
-    only when the run found any. Tier sections and the 90-day highlights show
-    at most max_per_company entries per company (default: criteria.yaml
-    `digest_max_per_company`, fallback 3) plus the overall 10-per-tier cap.
+    When `group_label` is set (multi-group runs, AD-0008) the block opens
+    with a **<label>** line under the title. TRENDING COMPANIES (new matches
+    from trending sources) and the MANUAL CHECK block render when the run has
+    them. NEW MATCHES (strong first, then worth a look) covers the
+    non-trending new listings and appears only when the run found any.
+    Tier sections and the 90-day highlights show at most max_per_company
+    entries per company (default: criteria.yaml `digest_max_per_company`,
+    fallback 3) plus the overall 10-per-tier cap.
     """
     highlights = highlights or []
     trending = trending or []
@@ -110,6 +113,8 @@ def format_digest(
 
     lines = []
     lines.append(f"Job Tracker Digest - {datetime.now().strftime('%b %d, %H:%M')}")
+    if group_label:
+        lines.append(f"**{group_label}**")
     if notes:
         lines.append(notes)
     lines.append("")
