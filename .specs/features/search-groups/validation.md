@@ -1,6 +1,6 @@
 # Validation Report - search-groups
 
-## Verdict
+## Verdict: PASS
 
 PASS — all GRP-01..GRP-08 acceptance criteria covered by named tests, all 5 required adversarial mutations killed, final gate 135/135 green (exit 0), live-config sanity runs clean.
 
