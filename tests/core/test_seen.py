@@ -216,3 +216,40 @@ def test_fresh_db_uses_composite_pk(isolated_db):
     conn.close()
     pk_cols = [r[1] for r in sorted(info, key=lambda r: r[5]) if r[5] > 0]
     assert pk_cols == ["url_hash", "group_name"]
+
+
+def test_clear_all_wipes_every_group(isolated_db):
+    """GRP-02: --reset (seen.clear_all) clears ALL groups, not just one."""
+    seen.mark_seen("https://jobs/a", "A", group="global")
+    seen.mark_seen("https://jobs/b", "B", group="emea")
+    seen.mark_seen("https://jobs/c", "C", group="spain-bcn")
+
+    seen.clear_all()
+
+    assert seen.is_seen("https://jobs/a") is False
+    assert seen.is_seen("https://jobs/b", group="emea") is False
+    assert seen.is_seen("https://jobs/c", group="spain-bcn") is False
+
+
+def test_v1_db_with_zero_rows_migrates_cleanly(isolated_db):
+    """Spec edge case: empty v1 db migrates to v2 without errors."""
+    v1 = sqlite3.connect(str(isolated_db / "seen.db"))
+    v1.execute(
+        """
+        CREATE TABLE seen (
+            url_hash TEXT PRIMARY KEY,
+            url TEXT NOT NULL,
+            title TEXT NOT NULL,
+            company TEXT,
+            source TEXT,
+            score INTEGER,
+            first_seen TEXT DEFAULT (datetime('now'))
+        )
+        """
+    )
+    v1.commit()
+    v1.close()
+
+    assert seen.is_seen("https://jobs/nothing") is False
+    seen.mark_seen("https://jobs/new", "New")
+    assert seen.is_seen("https://jobs/new") is True

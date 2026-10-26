@@ -22,7 +22,8 @@ without changing the global tracker's behavior or its Hermes cron contract.
 ### GRP-01: Group configuration loader
 
 - WHEN `config/groups.yaml` exists, the system SHALL load each entry under
-  `groups:` as a dict with keys `name` (str, required), `label` (str, default:
+  `groups:` as a dict with keys `name` (str, required; a missing name falls
+  back to a synthesized `group-<n>` rather than erroring), `label` (str, default:
   `name`), `require_location_keywords` (list[str], lowercased, default: empty),
   `sources` (list[str] subset or empty for all), `trending_manual` (bool,
   default: false).

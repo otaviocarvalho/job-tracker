@@ -339,6 +339,17 @@ def test_trending_manual_block_only_for_flagged_groups(monkeypatch):
     assert manual_pos < out.index("**Without Manual**")
 
 
+def test_group_filter_is_case_insensitive_substring(monkeypatch):
+    """GRP-07: the filter matches case-insensitively, like --source."""
+    monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
+    monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(BARCELONA)])
+
+    out = pipeline.run(group_filter="EMEA")
+
+    assert "**EMEA**" in out
+    assert "**Global**" not in out
+
+
 def test_dry_run_leaves_every_group_unmarked(monkeypatch):
     monkeypatch.setattr(pipeline, "load_sources", lambda: SOURCES[:1])
     monkeypatch.setattr(pipeline, "scrape_source", lambda s: [dict(BARCELONA)])
