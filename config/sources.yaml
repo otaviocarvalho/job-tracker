@@ -174,6 +174,157 @@ sources:
         - remote international
     url: https://boards.greenhouse.io/xai
 
+  # --- Euro remote-tech boards (LinkedIn "Euro Top Tech" 30-company list,
+  # added 2026-11-03). Probed live against public ATS APIs before wiring;
+  # job counts at probe time in the comment. 12 Greenhouse + 9 Ashby live
+  # feeds below (Kraken upgraded separately), 5 manual-check entries at EOF.
+  - name: "Canonical"
+    type: greenhouse
+    config:
+      board: canonical   # 314 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/canonical
+
+  - name: "Nebius"
+    type: greenhouse
+    config:
+      board: nebius      # 381 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/nebius
+
+  - name: "Mozilla"
+    type: greenhouse
+    config:
+      board: mozilla     # 111 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/mozilla
+
+  - name: "Affirm"
+    type: greenhouse
+    config:
+      board: affirm      # 240 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/affirm
+
+  - name: "Datadog"
+    type: greenhouse
+    config:
+      board: datadog     # 400 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/datadog
+
+  - name: "Elastic"
+    type: greenhouse
+    config:
+      board: elastic     # 413 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/elastic
+
+  - name: "Zscaler"
+    type: greenhouse
+    config:
+      board: zscaler     # 364 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/zscaler
+
+  - name: "Tide"
+    type: greenhouse
+    config:
+      board: tide        # 89 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/tide
+
+  - name: "Fingerprint"
+    type: greenhouse
+    config:
+      board: fingerprint # 19 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/fingerprint
+
+  - name: "Grafana Labs"
+    type: greenhouse
+    config:
+      board: grafanalabs # 126 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/grafanalabs
+
+  - name: "Chainguard"
+    type: greenhouse
+    config:
+      board: chainguard  # 96 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/chainguard
+
+  - name: "Prolific"
+    type: greenhouse
+    config:
+      board: prolific    # 28 jobs
+      trending: true
+    url: https://job-boards.greenhouse.io/prolific
+
+  - name: "ClickHouse"
+    type: ashby
+    config:
+      board: clickhouse  # 208 jobs, 132 remote
+      trending: true
+    url: https://jobs.ashbyhq.com/clickhouse
+
+  - name: "Supabase"
+    type: ashby
+    config:
+      board: supabase    # 69 jobs, 41 remote
+      trending: true
+    url: https://jobs.ashbyhq.com/supabase
+
+  - name: "Alan"
+    type: ashby
+    config:
+      board: alan        # 132 jobs
+      trending: true
+    url: https://jobs.ashbyhq.com/alan
+
+  - name: "Camunda"
+    type: ashby
+    config:
+      board: camunda     # 47 jobs, 20 remote
+      trending: true
+    url: https://jobs.ashbyhq.com/camunda
+
+  - name: "Primer"
+    type: ashby
+    config:
+      board: primer      # 21 jobs
+      trending: true
+    url: https://jobs.ashbyhq.com/primer
+
+  - name: "Docker"
+    type: ashby
+    config:
+      board: docker      # 49 jobs, 47 remote
+      trending: true
+    url: https://jobs.ashbyhq.com/docker
+
+  - name: "Tem"
+    type: ashby
+    config:
+      board: tem         # 20 jobs, all remote (UK energy supplier)
+      trending: true
+    url: https://jobs.ashbyhq.com/tem
+
+  - name: "n8n"
+    type: ashby
+    config:
+      board: n8n         # 52 jobs, 47 remote
+      trending: true
+    url: https://jobs.ashbyhq.com/n8n
+
+  - name: "Mistral AI"
+    type: ashby
+    config:
+      board: mistral.ai  # 230 jobs, 16 remote (board token has a dot)
+      trending: true
+    url: https://jobs.ashbyhq.com/mistral.ai
+
   # --- Trending MANUAL CHECK: no recurrently scrapeable board (captcha-gated
   # SPA, empty/filtered ATS board, or own careers site with no public API).
   # Surfaced in the digest so they get explored by hand periodically.
@@ -183,11 +334,16 @@ sources:
       trending: true
     url: https://cursor.com/careers
 
+  # Kraken: upgraded report→ashby 2026-11-03. The real board token is
+  # `kraken.com` (86 jobs, 85 remote at probe time) — the old `kraken`
+  # Ashby board is "(Analytics Only)" filtered, which is why this sat in
+  # manual check since AD-0006.
   - name: "Kraken"
-    type: report
+    type: ashby
     config:
+      board: kraken.com
       trending: true
-    url: https://jobs.kraken.com
+    url: https://jobs.ashbyhq.com/kraken.com
 
   - name: "Revolut"
     type: report
@@ -230,3 +386,36 @@ sources:
     config:
       trending: true
     url: https://www.deel.com/careers/open-roles/
+
+  # --- Euro Top Tech stragglers (added 2026-11-03): ATS found but not
+  # scrapeable with current feed drivers, or careers page is a JS-rendered
+  # SPA with no embedded payload.
+  - name: "Tether"
+    type: report
+    config:
+      trending: true
+    url: https://tether.recruitee.com   # Recruitee; API needs auth, no driver
+
+  - name: "Cast AI"
+    type: report
+    config:
+      trending: true
+    url: https://cast.ai/careers   # JS-rendered, no ATS markers in HTML
+
+  - name: "Addepar"
+    type: report
+    config:
+      trending: true
+    url: https://www.addepar.com/careers   # JS-rendered, ATS unknown
+
+  - name: "CrowdStrike"
+    type: report
+    config:
+      trending: true
+    url: https://crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers   # Workday
+
+  - name: "Nvidia"
+    type: report
+    config:
+      trending: true
+    url: https://nvidia.eightfold.ai/careers   # Eightfold, no driver

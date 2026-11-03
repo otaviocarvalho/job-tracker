@@ -11,7 +11,7 @@ def test_repo_root_resolves_to_repo_layout():
 
 def test_load_sources_returns_all_registered_sources():
     sources = config.load_sources()
-    assert len(sources) == 34  # 22 scraped feed entries + 12 manual/report sources
+    assert len(sources) == 60  # 44 scraped feed entries + 16 manual/report sources
     assert sources[0]["name"] == "a16z Portfolio"
     names = [s["name"] for s in sources]
     assert "HN Who's Hiring" in names
