@@ -137,7 +137,10 @@ def _run_main(tmp_path, *args):
 
 
 def test_golden_report_only_dry_run_byte_matches_pre_refactor(tmp_path):
-    proc = _run_main(tmp_path, "--source", "ramp", "--dry-run")
+    # "ramp vendor" pins the Ramp Vendor Reports report source uniquely — the
+    # Breakout List batch (2026-11-04) added a second "Ramp" ashby source, and
+    # a plain "ramp" filter would pull a network board into this byte-golden.
+    proc = _run_main(tmp_path, "--source", "ramp vendor", "--dry-run")
     assert proc.returncode == 0, proc.stderr
     assert TS_RE.sub(TS_TOKEN, proc.stdout) == GOLDEN_REPORT_ONLY
 

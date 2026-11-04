@@ -11,10 +11,13 @@ def test_repo_root_resolves_to_repo_layout():
 
 def test_load_sources_returns_all_registered_sources():
     sources = config.load_sources()
-    assert len(sources) == 60  # 44 scraped feed entries + 16 manual/report sources
+    assert len(sources) == 91  # 75 scraped feed entries + 16 manual/report sources
     assert sources[0]["name"] == "a16z Portfolio"
     names = [s["name"] for s in sources]
     assert "HN Who's Hiring" in names
+    # Breakout List 2026 batch (2026-11-04)
+    for breakout_name in ["Cognition", "Verkada", "Baseten", "fal", "Ramp"]:
+        assert breakout_name in names
     assert "infra.nyc" in names
     assert "xAI" in names  # AD-0007: London/EMEA/remote watchlist entry
 

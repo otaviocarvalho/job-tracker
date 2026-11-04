@@ -419,3 +419,226 @@ sources:
     config:
       trending: true
     url: https://nvidia.eightfold.ai/careers   # Eightfold, no driver
+
+  # --- Breakout List 2026 batch (salary chart screenshot, added 2026-11-04) ---
+  # 35 chart companies probed: 31 new Ashby boards below (org names verified
+  # via Ashby __appData). Skipped: Harvey + Kraken (already tracked above);
+  # Neros (greenhouse `nero` board dead/404) and Nominal (careers page has
+  # no public ATS board) — manual check only if wanted later.
+  # Note: Ramp lives on Ashby now (166 jobs); gh:ramp is a 1-job relic.
+  - name: "Aaru"
+    type: ashby
+    config:
+      board: aaru
+      trending: true
+    url: https://jobs.ashbyhq.com/aaru
+
+  - name: "Twenty"
+    type: ashby
+    config:
+      board: twenty
+      trending: true
+    url: https://jobs.ashbyhq.com/twenty
+
+  - name: "Mercor"
+    type: ashby
+    config:
+      board: mercor
+      trending: true
+    url: https://jobs.ashbyhq.com/mercor
+
+  - name: "Simile"
+    type: ashby
+    config:
+      board: simile
+      trending: true
+    url: https://jobs.ashbyhq.com/simile
+
+  - name: "Rogo"
+    type: ashby
+    config:
+      board: rogo
+      trending: true
+    url: https://jobs.ashbyhq.com/rogo
+
+  - name: "Cognition"
+    type: ashby
+    config:
+      board: cognition
+      trending: true
+    url: https://jobs.ashbyhq.com/cognition
+
+  - name: "Etched"
+    type: ashby
+    config:
+      board: etchedai
+      trending: true
+    url: https://jobs.ashbyhq.com/etchedai
+
+  - name: "Exa"
+    type: ashby
+    config:
+      board: exa
+      trending: true
+    url: https://jobs.ashbyhq.com/exa
+
+  - name: "Serval"
+    type: ashby
+    config:
+      board: serval
+      trending: true
+    url: https://jobs.ashbyhq.com/serval
+
+  - name: "Modal"
+    type: ashby
+    config:
+      board: modal
+      trending: true
+    url: https://jobs.ashbyhq.com/modal
+
+  - name: "Ramp"
+    type: ashby
+    config:
+      board: ramp
+      trending: true
+    url: https://jobs.ashbyhq.com/ramp
+
+  - name: "Fluidstack"
+    type: ashby
+    config:
+      board: fluidstack
+      trending: true
+    url: https://jobs.ashbyhq.com/fluidstack
+
+  - name: "Sail Research"
+    type: ashby
+    config:
+      board: sail
+      trending: true
+    url: https://jobs.ashbyhq.com/sail
+
+  - name: "Higgsfield"
+    type: ashby
+    config:
+      board: higgsfieldai
+      trending: true
+    url: https://jobs.ashbyhq.com/higgsfieldai
+
+  - name: "Baseten"
+    type: ashby
+    config:
+      board: baseten
+      trending: true
+    url: https://jobs.ashbyhq.com/baseten
+
+  - name: "Listen Labs"
+    type: ashby
+    config:
+      board: listenlabs
+      trending: true
+    url: https://jobs.ashbyhq.com/listenlabs
+
+  - name: "Handshake"
+    type: ashby
+    config:
+      board: handshake
+      trending: true
+    url: https://jobs.ashbyhq.com/handshake
+
+  - name: "Owner"
+    type: ashby
+    config:
+      board: owner
+      trending: true
+    url: https://jobs.ashbyhq.com/owner
+
+  - name: "Pangram Labs"
+    type: ashby
+    config:
+      board: pangramlabs
+      trending: true
+    url: https://jobs.ashbyhq.com/pangramlabs
+
+  - name: "Pallet"
+    type: ashby
+    config:
+      board: pallet
+      trending: true
+    url: https://jobs.ashbyhq.com/pallet
+
+  - name: "fal"
+    type: ashby
+    config:
+      board: fal-ai
+      trending: true
+    url: https://jobs.ashbyhq.com/fal-ai
+
+  - name: "Kalshi"
+    type: ashby
+    config:
+      board: kalshi
+      trending: true
+    url: https://jobs.ashbyhq.com/kalshi
+
+  - name: "Verkada"
+    type: ashby
+    config:
+      board: verkada
+      trending: true
+    url: https://jobs.ashbyhq.com/verkada
+
+  - name: "Fireworks AI"
+    type: ashby
+    config:
+      board: fireworks
+      trending: true
+    url: https://jobs.ashbyhq.com/fireworks
+
+  - name: "Mithril"
+    type: ashby
+    config:
+      board: mithril
+      trending: true
+    url: https://jobs.ashbyhq.com/mithril
+
+  - name: "Mach Industries"
+    type: ashby
+    config:
+      board: machindustries
+      trending: true
+    url: https://jobs.ashbyhq.com/machindustries
+
+  - name: "Antares Nuclear"
+    type: ashby
+    config:
+      board: antares
+      trending: true
+    url: https://jobs.ashbyhq.com/antares
+
+  - name: "Verse Medical"
+    type: ashby
+    config:
+      board: versemedical
+      trending: true
+    url: https://jobs.ashbyhq.com/versemedical
+
+  - name: "Valar Atomics"
+    type: ashby
+    config:
+      board: valaratomics
+      trending: true
+    url: https://jobs.ashbyhq.com/valaratomics
+
+  - name: "Fab2"
+    type: ashby
+    config:
+      board: fab2
+      trending: true
+    url: https://jobs.ashbyhq.com/fab2
+
+  - name: "General Matter"
+    type: ashby
+    config:
+      board: generalmatter
+      trending: true
+    url: https://jobs.ashbyhq.com/generalmatter
