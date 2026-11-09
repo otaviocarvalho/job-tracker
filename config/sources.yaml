@@ -642,3 +642,469 @@ sources:
       board: generalmatter
       trending: true
     url: https://jobs.ashbyhq.com/generalmatter
+
+# --- Spain/EU batch (2026-11-09): curated from spanishtoptechcompanies.com
+# (public CC BY-SA dataset, 678 companies). Boards probed live + org-name verified;
+# consultancies/outsourcers and namesake boards dropped. Lever = new feed type.
+
+  - name: "N26"
+    type: greenhouse
+    config:
+      board: n26
+    url: https://boards.greenhouse.io/n26
+
+  - name: "Cabify"
+    type: greenhouse
+    config:
+      board: cabify
+    url: https://boards.greenhouse.io/cabify
+
+  - name: "Typeform"
+    type: greenhouse
+    config:
+      board: typeform
+    url: https://boards.greenhouse.io/typeform
+
+  - name: "Ocado Group"
+    type: greenhouse
+    config:
+      board: ocadogroup
+    url: https://boards.greenhouse.io/ocadogroup
+
+  - name: "FreeNow"
+    type: greenhouse
+    config:
+      board: freenow
+    url: https://boards.greenhouse.io/freenow
+
+  - name: "Twilio"
+    type: greenhouse
+    config:
+      board: twilio
+    url: https://boards.greenhouse.io/twilio
+
+  - name: "Scopely"
+    type: greenhouse
+    config:
+      board: scopely
+    url: https://boards.greenhouse.io/scopely
+
+  - name: "Celonis"
+    type: greenhouse
+    config:
+      board: celonis
+    url: https://boards.greenhouse.io/celonis
+
+  - name: "Fever"
+    type: greenhouse
+    config:
+      board: feverup
+    url: https://boards.greenhouse.io/feverup
+
+  - name: "Wallapop"
+    type: greenhouse
+    config:
+      board: wallapop
+    url: https://boards.greenhouse.io/wallapop
+
+  - name: "Workato"
+    type: greenhouse
+    config:
+      board: workato
+    url: https://boards.greenhouse.io/workato
+
+  - name: "Ebury"
+    type: greenhouse
+    config:
+      board: ebury
+    url: https://boards.greenhouse.io/ebury
+
+  - name: "Bitpanda"
+    type: greenhouse
+    config:
+      board: bitpanda
+    url: https://boards.greenhouse.io/bitpanda
+
+  - name: "Adyen"
+    type: greenhouse
+    config:
+      board: adyen
+    url: https://boards.greenhouse.io/adyen
+
+  - name: "Monzo"
+    type: greenhouse
+    config:
+      board: monzo
+    url: https://boards.greenhouse.io/monzo
+
+  - name: "Block"
+    type: greenhouse
+    config:
+      board: block
+    url: https://boards.greenhouse.io/block
+
+  - name: "MongoDB"
+    type: greenhouse
+    config:
+      board: mongodb
+    url: https://boards.greenhouse.io/mongodb
+
+  - name: "Cloudflare"
+    type: greenhouse
+    config:
+      board: cloudflare
+    url: https://boards.greenhouse.io/cloudflare
+
+  - name: "Coinbase"
+    type: greenhouse
+    config:
+      board: coinbase
+    url: https://boards.greenhouse.io/coinbase
+
+  - name: "Netskope"
+    type: greenhouse
+    config:
+      board: netskope
+    url: https://boards.greenhouse.io/netskope
+
+  - name: "TheFork"
+    type: greenhouse
+    config:
+      board: thefork
+    url: https://boards.greenhouse.io/thefork
+
+  - name: "The Trade Desk"
+    type: greenhouse
+    config:
+      board: thetradedesk
+    url: https://boards.greenhouse.io/thetradedesk
+
+  - name: "Lucid Software"
+    type: greenhouse
+    config:
+      board: lucidsoftware
+    url: https://boards.greenhouse.io/lucidsoftware
+
+  - name: "Carta"
+    type: greenhouse
+    config:
+      board: carta
+    url: https://boards.greenhouse.io/carta
+
+  - name: "Form3"
+    type: greenhouse
+    config:
+      board: form3
+    url: https://boards.greenhouse.io/form3
+
+  - name: "Fourthline"
+    type: greenhouse
+    config:
+      board: fourthline
+    url: https://boards.greenhouse.io/fourthline
+
+  - name: "Grover"
+    type: greenhouse
+    config:
+      board: grover
+    url: https://boards.greenhouse.io/grover
+
+  - name: "Feedzai"
+    type: greenhouse
+    config:
+      board: feedzai
+    url: https://boards.greenhouse.io/feedzai
+
+  - name: "Mattermost"
+    type: greenhouse
+    config:
+      board: mattermost
+    url: https://boards.greenhouse.io/mattermost
+
+  - name: "PandaDoc"
+    type: greenhouse
+    config:
+      board: pandadoc
+    url: https://boards.greenhouse.io/pandadoc
+
+  - name: "Topsort"
+    type: greenhouse
+    config:
+      board: topsort
+    url: https://boards.greenhouse.io/topsort
+
+  - name: "SeatGeek"
+    type: greenhouse
+    config:
+      board: seatgeek
+    url: https://boards.greenhouse.io/seatgeek
+
+  - name: "AppsFlyer"
+    type: greenhouse
+    config:
+      board: appsflyer
+    url: https://boards.greenhouse.io/appsflyer
+
+  - name: "Lob"
+    type: greenhouse
+    config:
+      board: lob
+    url: https://boards.greenhouse.io/lob
+
+  - name: "Auvik Networks"
+    type: greenhouse
+    config:
+      board: auviknetworks
+    url: https://boards.greenhouse.io/auviknetworks
+
+  - name: "Auctane"
+    type: greenhouse
+    config:
+      board: auctane
+    url: https://boards.greenhouse.io/auctane
+
+  - name: "Blacklane"
+    type: greenhouse
+    config:
+      board: blacklane
+    url: https://boards.greenhouse.io/blacklane
+
+  - name: "Preply"
+    type: ashby
+    config:
+      board: preply
+    url: https://jobs.ashbyhq.com/preply
+
+  - name: "Qonto"
+    type: ashby
+    config:
+      board: qonto
+    url: https://jobs.ashbyhq.com/qonto
+
+  - name: "Docplanner"
+    type: ashby
+    config:
+      board: docplanner
+    url: https://jobs.ashbyhq.com/docplanner
+
+  - name: "Manychat"
+    type: ashby
+    config:
+      board: manychat
+    url: https://jobs.ashbyhq.com/manychat
+
+  - name: "Pleo"
+    type: ashby
+    config:
+      board: pleo
+    url: https://jobs.ashbyhq.com/pleo
+
+  - name: "Kiwi.com"
+    type: ashby
+    config:
+      board: kiwi-com
+    url: https://jobs.ashbyhq.com/kiwi-com
+
+  - name: "Trainline"
+    type: ashby
+    config:
+      board: trainline
+    url: https://jobs.ashbyhq.com/trainline
+
+  - name: "Too Good To Go"
+    type: ashby
+    config:
+      board: toogoodtogo
+    url: https://jobs.ashbyhq.com/toogoodtogo
+
+  - name: "Abacum"
+    type: ashby
+    config:
+      board: abacum
+    url: https://jobs.ashbyhq.com/abacum
+
+  - name: "Belvo"
+    type: ashby
+    config:
+      board: belvo
+    url: https://jobs.ashbyhq.com/belvo
+
+  - name: "Pennylane"
+    type: ashby
+    config:
+      board: pennylane
+    url: https://jobs.ashbyhq.com/pennylane
+
+  - name: "Back Market"
+    type: ashby
+    config:
+      board: backmarket
+    url: https://jobs.ashbyhq.com/backmarket
+
+  - name: "Perk"
+    type: ashby
+    config:
+      board: perk
+    url: https://jobs.ashbyhq.com/perk
+
+  - name: "Quantexa"
+    type: ashby
+    config:
+      board: quantexa
+    url: https://jobs.ashbyhq.com/quantexa
+
+  - name: "Oyster HR"
+    type: ashby
+    config:
+      board: oyster
+    url: https://jobs.ashbyhq.com/oyster
+
+  - name: "Drata"
+    type: ashby
+    config:
+      board: drata
+    url: https://jobs.ashbyhq.com/drata
+
+  - name: "Help Scout"
+    type: ashby
+    config:
+      board: helpscout
+    url: https://jobs.ashbyhq.com/helpscout
+
+  - name: "Hopper"
+    type: ashby
+    config:
+      board: hopper
+    url: https://jobs.ashbyhq.com/hopper
+
+  - name: "MURAL"
+    type: ashby
+    config:
+      board: mural
+    url: https://jobs.ashbyhq.com/mural
+
+  - name: "Joko"
+    type: ashby
+    config:
+      board: joko
+    url: https://jobs.ashbyhq.com/joko
+
+  - name: "JOOR"
+    type: ashby
+    config:
+      board: joor
+    url: https://jobs.ashbyhq.com/joor
+
+  - name: "Lendable"
+    type: ashby
+    config:
+      board: lendable
+    url: https://jobs.ashbyhq.com/lendable
+
+  - name: "TestGorilla"
+    type: ashby
+    config:
+      board: testgorilla
+    url: https://jobs.ashbyhq.com/testgorilla
+
+  - name: "TheyDo"
+    type: ashby
+    config:
+      board: theydo
+    url: https://jobs.ashbyhq.com/theydo
+
+  - name: "Bynder"
+    type: ashby
+    config:
+      board: bynder
+    url: https://jobs.ashbyhq.com/bynder
+
+  - name: "Teya"
+    type: ashby
+    config:
+      board: teya
+    url: https://jobs.ashbyhq.com/teya
+
+  - name: "Rillet"
+    type: ashby
+    config:
+      board: rillet
+    url: https://jobs.ashbyhq.com/rillet
+
+  - name: "Paddle"
+    type: ashby
+    config:
+      board: paddle
+    url: https://jobs.ashbyhq.com/paddle
+
+  - name: "Spotify"
+    type: lever
+    config:
+      board: spotify
+    url: https://jobs.lever.co/spotify
+
+  - name: "Contentsquare"
+    type: lever
+    config:
+      board: contentsquare
+    url: https://jobs.lever.co/contentsquare
+
+  - name: "Veepee"
+    type: lever
+    config:
+      board: veepee
+    url: https://jobs.lever.co/veepee
+
+  - name: "Sysdig"
+    type: lever
+    config:
+      board: sysdig
+    url: https://jobs.lever.co/sysdig
+
+  - name: "Lodgify"
+    type: lever
+    config:
+      board: lodgify
+    url: https://jobs.lever.co/lodgify
+
+  - name: "Rover.com"
+    type: lever
+    config:
+      board: rover
+    url: https://jobs.lever.co/rover
+
+  - name: "Veeva Systems"
+    type: lever
+    config:
+      board: veeva
+    url: https://jobs.lever.co/veeva
+
+  - name: "SonarSource"
+    type: lever
+    config:
+      board: sonarsource
+    url: https://jobs.lever.co/sonarsource
+
+  - name: "MoonPay"
+    type: lever
+    config:
+      board: moonpay
+    url: https://jobs.lever.co/moonpay
+
+  - name: "Matillion"
+    type: lever
+    config:
+      board: matillion
+    url: https://jobs.lever.co/matillion
+
+  - name: "Agicap"
+    type: lever
+    config:
+      board: agicap
+    url: https://jobs.lever.co/agicap
+
+  - name: "Deliverect"
+    type: lever
+    config:
+      board: deliverect
+    url: https://jobs.lever.co/deliverect

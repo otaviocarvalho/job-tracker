@@ -11,7 +11,7 @@ def test_repo_root_resolves_to_repo_layout():
 
 def test_load_sources_returns_all_registered_sources():
     sources = config.load_sources()
-    assert len(sources) == 91  # 75 scraped feed entries + 16 manual/report sources
+    assert len(sources) == 168  # 152 scraped feed entries + 16 manual/report sources
     assert sources[0]["name"] == "a16z Portfolio"
     names = [s["name"] for s in sources]
     assert "HN Who's Hiring" in names
@@ -20,6 +20,9 @@ def test_load_sources_returns_all_registered_sources():
         assert breakout_name in names
     assert "infra.nyc" in names
     assert "xAI" in names  # AD-0007: London/EMEA/remote watchlist entry
+    # Spain/EU batch (2026-11-09, from spanishtoptechcompanies.com; incl. new Lever feed)
+    for spain_name in ["N26", "Cabify", "Fever", "Preply", "Too Good To Go", "Spotify"]:
+        assert spain_name in names
 
 
 def test_load_sources_entries_carry_type_and_url():

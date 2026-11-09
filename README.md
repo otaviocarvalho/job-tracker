@@ -74,6 +74,8 @@ Removed 2026-08-30: Sequoia, Index Ventures, Greylock Greenhouse boards (all 404
 
 Run one group with `python main.py --group <name>`; plain `main.py` runs all groups in one output. First runs of a fresh group backfill (everything gate-passing is new), afterwards only genuinely new listings appear. Tune keywords in the yaml, not in code.
 
+**Spain/EU batch** (added 2026-11-09): 77 sources curated from [spanishtoptechcompanies.com](https://spanishtoptechcompanies.com/es/) (public CC BY-SA company dataset, 678 companies): 37 Greenhouse + 28 Ashby + 12 Lever boards, weighted by salary-report volume, EU presence, and verified live org-name match. This batch added the **Lever feed type** (`src/jobtracker/feeds/lever.py`, public postings API `api.lever.co/v0/postings/{board}`). Consultancies/outsourcers and namesake boards were dropped (e.g. ashby `multiverse` is the UK apprenticeships firm, not Multiverse Computing; greenhouse `remote` is "General Assembly Remote Jobs"). Companies with proprietary portals and no public ATS API (Glovo, Adevinta, Amazon, eDreams, Semrush, TravelPerk, Personio, Factorial, Skyscanner, Eventbrite, Red Hat, Dynatrace, idealista, Wallbox, Devo, Flywire, Hiberus, SDG Group, Holded) stay off the feeds — watch by hand. All new boards feed all groups; the `spain-bcn` / `emea` gates pick up the Spanish locations automatically.
+
 Manual-check sources (`type: report`) are listed for reference only; they are not scraped automatically.
 
 ## Adding the Scheduled Job to Hermes
